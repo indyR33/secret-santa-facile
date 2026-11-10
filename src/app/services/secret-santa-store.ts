@@ -778,21 +778,42 @@ export class SecretSantaStore {
     const title = targetEvt ? targetEvt.title : 'Atelier';
 
     if (this.isCloudConnected() && this.db && this.currentUser()) {
+      const uid = this.currentUser()!.uid;
       const path = `events/${eventId}`;
       try {
-        // 1. Suppression des documents des sous-collections (participants, souhaits, messages)
-        const partsSnap = await getDocs(collection(this.db, `events/${eventId}/participants`));
-        const wishesSnap = await getDocs(collection(this.db, `events/${eventId}/wishes`));
-        const msgsSnap = await getDocs(collection(this.db, `events/${eventId}/messages`));
+        // 1. Récupération sécurisée avec clause where('ownerId', '==', uid) requise par firestore.rules
+        const partsSnap = await getDocs(
+          query(collection(this.db, `events/${eventId}/participants`), where('ownerId', '==', uid))
+        );
+        const wishesSnap = await getDocs(
+          query(collection(this.db, `events/${eventId}/wishes`), where('ownerId', '==', uid))
+        );
+        const msgsSnap = await getDocs(
+          query(collection(this.db, `events/${eventId}/messages`), where('ownerId', '==', uid))
+        );
 
-        const batch = writeBatch(this.db);
-        partsSnap.forEach((d) => batch.delete(d.ref));
-        wishesSnap.forEach((d) => batch.delete(d.ref));
-        msgsSnap.forEach((d) => batch.delete(d.ref));
-        // 2. Suppression de l'événement principal
-        batch.delete(doc(this.db, 'events', eventId));
+        // 2. Suppression des documents des sous-collections dans un premier temps
+        let hasSubDocs = false;
+        const subBatch = writeBatch(this.db);
+        partsSnap.forEach((d) => {
+          subBatch.delete(d.ref);
+          hasSubDocs = true;
+        });
+        wishesSnap.forEach((d) => {
+          subBatch.delete(d.ref);
+          hasSubDocs = true;
+        });
+        msgsSnap.forEach((d) => {
+          subBatch.delete(d.ref);
+          hasSubDocs = true;
+        });
 
-        await batch.commit();
+        if (hasSubDocs) {
+          await subBatch.commit();
+        }
+
+        // 3. Suppression du document événement principal
+        await deleteDoc(doc(this.db, 'events', eventId));
 
         const remainingEvents = this.cloudEvents().filter((e) => e.id !== eventId);
         if (this.activeEventId() === eventId) {
