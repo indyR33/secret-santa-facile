@@ -1,0 +1,6 @@
+{
+  "summary":  "Plan d'implémentation complet pour L'Atelier du Père Noël Secret : application web en français d'organisation et de suivi de Secret Santa avec tirage sous contraintes d'exclusion, révélation par code PIN et lien individuel, listes de souhaits, suivi d'avancement des cadeaux, messagerie anonyme bidirectionnelle et synchronisation temps réel via Firebase Firestore.",
+  "updatedAt":  "2026-11-09T09:06:57.552785050Z",
+  "requestFeedback":  true,
+  "userFacing":  true
+}

@@ -1,0 +1,2084 @@
+<div class="min-h-screen flex flex-col bg-[#FFFDF9] text-[#1E1B18]">
+  <!-- ===================================================================== -->
+  <!-- BARRE SUPÉRIEURE (Contrat strict à 3 zones : Marque · 4 Liens · CTA)   -->
+  <!-- ===================================================================== -->
+  <header class="sticky top-0 z-30 bg-[#FFFDF9]/95 backdrop-blur-sm border-b border-[#E6DEC8]">
+    <div class="max-w-[1280px] mx-auto flex items-center justify-between gap-8 px-6 py-4">
+      <!-- Zone 1 : Marque sur une seule ligne -->
+      <a
+        href="#top"
+        (click)="setSection('workshop'); $event.preventDefault()"
+        class="font-display text-xl font-bold tracking-tight text-[#1E1B18] whitespace-nowrap shrink-0"
+      >
+        L'Atelier du Père Noël Secret
+      </a>
+
+      <!-- Zone 2 : 4 liens de navigation concis sur une seule ligne -->
+      <nav aria-label="Navigation principale" class="hidden md:flex items-center gap-7 text-sm font-medium text-[#5C5346]">
+        <button
+          type="button"
+          (click)="setSection('workshop')"
+          class="py-1 transition-colors whitespace-nowrap shrink-0 border-b-2 cursor-pointer"
+          [class.border-[#C81E32]]="activeSection() === 'workshop'"
+          [class.text-[#1E1B18]]="activeSection() === 'workshop'"
+          [class.font-semibold]="activeSection() === 'workshop'"
+          [class.border-transparent]="activeSection() !== 'workshop'"
+        >
+          Atelier &amp; Tirage
+        </button>
+        <button
+          type="button"
+          (click)="setSection('reveal')"
+          class="py-1 transition-colors whitespace-nowrap shrink-0 border-b-2 cursor-pointer"
+          [class.border-[#C81E32]]="activeSection() === 'reveal'"
+          [class.text-[#1E1B18]]="activeSection() === 'reveal'"
+          [class.font-semibold]="activeSection() === 'reveal'"
+          [class.border-transparent]="activeSection() !== 'reveal'"
+        >
+          Cartes &amp; Codes PIN
+        </button>
+        <button
+          type="button"
+          (click)="setSection('wishes')"
+          class="py-1 transition-colors whitespace-nowrap shrink-0 border-b-2 cursor-pointer"
+          [class.border-[#C81E32]]="activeSection() === 'wishes'"
+          [class.text-[#1E1B18]]="activeSection() === 'wishes'"
+          [class.font-semibold]="activeSection() === 'wishes'"
+          [class.border-transparent]="activeSection() !== 'wishes'"
+        >
+          Listes de Souhaits
+        </button>
+        <button
+          type="button"
+          (click)="setSection('messages')"
+          class="py-1 transition-colors whitespace-nowrap shrink-0 border-b-2 cursor-pointer"
+          [class.border-[#C81E32]]="activeSection() === 'messages'"
+          [class.text-[#1E1B18]]="activeSection() === 'messages'"
+          [class.font-semibold]="activeSection() === 'messages'"
+          [class.border-transparent]="activeSection() !== 'messages'"
+        >
+          Poste Anonyme
+        </button>
+      </nav>
+
+      <!-- Zone 3 : 1 action principale -->
+      <div class="flex items-center shrink-0">
+        <button
+          type="button"
+          (click)="openNewEventModal()"
+          class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-[#C81E32] rounded-xl hover:bg-[#A61728] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+        >
+          <mat-icon class="!text-base !w-4 !h-4 leading-none">add_circle</mat-icon>
+          <span>Nouvel Événement</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation mobile compacte -->
+    <div class="flex md:hidden items-center justify-around border-t border-[#E6DEC8] bg-[#F7F2E7] px-2 py-1.5 text-xs font-medium text-[#5C5346]">
+      <button
+        type="button"
+        (click)="setSection('workshop')"
+        class="px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0"
+        [class.bg-white]="activeSection() === 'workshop'"
+        [class.text-[#C81E32]]="activeSection() === 'workshop'"
+        [class.font-semibold]="activeSection() === 'workshop'"
+      >
+        Atelier
+      </button>
+      <button
+        type="button"
+        (click)="setSection('reveal')"
+        class="px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0"
+        [class.bg-white]="activeSection() === 'reveal'"
+        [class.text-[#C81E32]]="activeSection() === 'reveal'"
+        [class.font-semibold]="activeSection() === 'reveal'"
+      >
+        Codes PIN
+      </button>
+      <button
+        type="button"
+        (click)="setSection('wishes')"
+        class="px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0"
+        [class.bg-white]="activeSection() === 'wishes'"
+        [class.text-[#C81E32]]="activeSection() === 'wishes'"
+        [class.font-semibold]="activeSection() === 'wishes'"
+      >
+        Souhaits
+      </button>
+      <button
+        type="button"
+        (click)="setSection('messages')"
+        class="px-2.5 py-1.5 rounded-lg whitespace-nowrap shrink-0"
+        [class.bg-white]="activeSection() === 'messages'"
+        [class.text-[#C81E32]]="activeSection() === 'messages'"
+        [class.font-semibold]="activeSection() === 'messages'"
+      >
+        Poste Anonyme
+      </button>
+    </div>
+  </header>
+
+  <!-- Notification Toast -->
+  @if (store.toastMessage(); as toast) {
+    <div
+      role="status"
+      aria-live="polite"
+      class="fixed bottom-5 right-5 z-50 flex items-center gap-3 px-4 py-3 rounded-xl bg-[#1E1B18] text-[#FFFDF9] text-sm shadow-md border border-[#E6DEC8]/20"
+    >
+      <mat-icon class="!text-lg !w-5 !h-5 text-[#F59E0B]">redeem</mat-icon>
+      <span>{{ toast }}</span>
+    </div>
+  }
+
+  <!-- Bannière d'erreur éventuelle -->
+  @if (store.errorBanner(); as errText) {
+    <div class="bg-[#FEF2F2] border-b border-[#FECACA] px-6 py-3">
+      <div class="max-w-[1280px] mx-auto flex items-center justify-between gap-4 text-sm text-[#991B1B]">
+        <div class="flex items-center gap-2">
+          <mat-icon class="!text-lg !w-5 !h-5">error_outline</mat-icon>
+          <span>{{ errText }}</span>
+        </div>
+        <button
+          type="button"
+          (click)="store.errorBanner.set(null)"
+          class="inline-flex items-center gap-1 text-xs font-semibold underline whitespace-nowrap shrink-0 cursor-pointer"
+        >
+          <mat-icon class="!text-sm !w-4 !h-4">close</mat-icon>
+          <span>Fermer</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ===================================================================== -->
+  <!-- CONTENU PRINCIPAL                                                      -->
+  <!-- ===================================================================== -->
+  <main class="flex-1 max-w-[1280px] w-full mx-auto px-6 py-8 space-y-10">
+    <!-- Barre d'outils d'événement & Synchronisation Cloud Firestore -->
+    <section class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#E6DEC8]">
+      <div class="flex flex-wrap items-center gap-3">
+        <label for="eventSelector" class="text-xs font-semibold text-[#5C5346]">
+          Événement actif :
+        </label>
+        <select
+          id="eventSelector"
+          (change)="onEventChange($event)"
+          class="px-3.5 py-2 text-sm font-medium bg-white border border-[#E6DEC8] rounded-xl text-[#1E1B18] focus:outline-none focus:ring-2 focus:ring-[#C81E32]"
+        >
+          @for (evt of store.events(); track evt.id) {
+            <option [value]="evt.id" [selected]="evt.id === store.activeEvent()?.id">
+              {{ evt.title }} ({{ evt.inviteCode }})
+            </option>
+          }
+        </select>
+
+        @if (store.activeEvent(); as currentEvt) {
+          <button
+            type="button"
+            (click)="confirmDeleteEvent(currentEvt)"
+            class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#991B1B] bg-[#FEF2F2] hover:bg-[#FEE2E2] border border-[#FECACA] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            title="Supprimer définitivement cet atelier"
+          >
+            <mat-icon class="!text-sm !w-4 !h-4">delete_outline</mat-icon>
+            <span>Supprimer l'atelier</span>
+          </button>
+        }
+
+        @if (unlockedParticipant(); as currentP) {
+          <div class="flex items-center gap-2 text-xs text-[#166534] pl-2">
+            <mat-icon class="!text-base !w-4 !h-4">verified_user</mat-icon>
+            <span>Session active : <strong>{{ currentP.name }}</strong></span>
+            <button
+              type="button"
+              (click)="lockCurrentSession()"
+              class="inline-flex items-center gap-1 text-[#C81E32] hover:underline font-medium whitespace-nowrap shrink-0 cursor-pointer ml-1"
+            >
+              <mat-icon class="!text-sm !w-3.5 !h-3.5">lock</mat-icon>
+              <span>Verrouiller</span>
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Contrôles Cloud Firestore & Effets Sonores -->
+      <div class="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          (click)="store.toggleSound()"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#F7F2E7] hover:bg-[#EDE4D1] text-[#1E1B18] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+        >
+          <mat-icon class="!text-base !w-4 !h-4">
+            {{ store.soundEnabled() ? 'volume_up' : 'volume_off' }}
+          </mat-icon>
+          <span>{{ store.soundEnabled() ? 'Sons activés' : 'Sons coupés' }}</span>
+        </button>
+
+        @if (store.isCloudConnected()) {
+          <div class="flex flex-wrap items-center gap-2 text-xs text-[#5C5346]">
+            <span class="inline-flex items-center gap-1.5 text-[#166534] font-medium bg-[#F0FDF4] px-2.5 py-1 rounded-lg border border-[#BBF7D0]">
+              <mat-icon class="!text-sm !w-4 !h-4">verified</mat-icon>
+              <span>Organisateur : <strong>{{ store.currentUser()?.displayName || store.currentUser()?.email }}</strong></span>
+            </span>
+            @if (store.events().length === 0) {
+              <button
+                type="button"
+                (click)="store.seedDemoEventToCloud()"
+                class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold bg-[#166534] text-white rounded-xl hover:bg-[#14532D] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                <mat-icon class="!text-sm !w-4 !h-4">cloud_upload</mat-icon>
+                <span>Importer l'Atelier d'Exemple</span>
+              </button>
+            }
+            <button
+              type="button"
+              (click)="store.logout()"
+              class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-white border border-[#E6DEC8] rounded-xl hover:bg-[#F7F2E7] text-[#1E1B18] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              <mat-icon class="!text-sm !w-4 !h-4">logout</mat-icon>
+              <span>Déconnexion</span>
+            </button>
+          </div>
+        } @else {
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs text-[#5C5346]">Mode Atelier Démo</span>
+            <button
+              type="button"
+              (click)="openAuthModal('signin')"
+              class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-white border border-[#E6DEC8] hover:bg-[#F7F2E7] text-[#1E1B18] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              <mat-icon class="!text-base !w-4 !h-4 text-[#C81E32]">account_circle</mat-icon>
+              <span>Connexion Organisateur (Google SSO ou Email)</span>
+            </button>
+          </div>
+        }
+      </div>
+    </section>
+
+    @if (store.activeEvent(); as evt) {
+      <!-- =================================================================== -->
+      <!-- BANNIÈRE HERO DE L'ÉVÉNEMENT (Grille 2 colonnes équilibrée)         -->
+      <!-- =================================================================== -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        <!-- Colonne gauche : Détails de la fête et actions clés -->
+        <div class="lg:col-span-7 bg-white border border-[#E6DEC8] rounded-2xl p-6 sm:p-8 flex flex-col justify-between space-y-6">
+          <div class="space-y-4">
+            <!-- Métadonnées épurées sans pilules (Zero-Pill Discipline) -->
+            <div class="flex flex-wrap items-center gap-2 text-xs font-medium text-[#5C5346]">
+              <span>Code atelier : <strong class="font-mono-tabular text-[#1E1B18]">{{ evt.inviteCode }}</strong></span>
+              <span aria-hidden="true">·</span>
+              <span>Échange le {{ formatEventDate(evt.eventDate) }}</span>
+              <span aria-hidden="true">·</span>
+              <span>{{ evt.location }}</span>
+              <span aria-hidden="true">·</span>
+              <span>
+                {{ evt.status === 'drawn' ? 'Tirage scellé' : evt.status === 'completed' ? 'Échange terminé' : 'En préparation' }}
+              </span>
+            </div>
+
+            <h1 class="font-display text-3xl sm:text-4xl font-bold text-[#1E1B18] leading-tight">
+              {{ evt.title }}
+            </h1>
+
+            <p class="text-base text-[#5C5346] leading-relaxed max-w-2xl">
+              {{ evt.subtitle || 'Préparez vos listes de souhaits, découvrez votre mission secrète avec votre code PIN et échangez anonymement avant le jour J.' }}
+            </p>
+          </div>
+
+          <div class="pt-4 border-t border-[#E6DEC8] flex flex-wrap items-center justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                (click)="setSection('reveal')"
+                class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#C81E32] hover:bg-[#A61728] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                <mat-icon class="!text-lg !w-5 !h-5">mail_lock</mat-icon>
+                <span>Découvrir mon Tirage Secret</span>
+              </button>
+              <button
+                type="button"
+                (click)="setSection('wishes')"
+                class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[#1E1B18] bg-[#F7F2E7] hover:bg-[#EDE4D1] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                <mat-icon class="!text-lg !w-5 !h-5 text-[#166534]">card_giftcard</mat-icon>
+                <span>Compléter ma Liste</span>
+              </button>
+            </div>
+
+            <div class="text-xs text-[#5C5346]">
+              Budget conseillé : <strong class="font-mono-tabular text-sm text-[#1E1B18]">{{ evt.budget }} €</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Colonne droite : Illustration de l'atelier du Père Noël avec fallback résilient -->
+        <div class="lg:col-span-5 relative rounded-2xl overflow-hidden border border-[#E6DEC8] bg-[#2C1810] min-h-[260px]">
+          @if (!brokenImages()['hero']) {
+            <img
+              [src]="heroImageUrl"
+              alt="Illustration chaleureuse de l'atelier du Père Noël avec jouets en bois et cadeaux emballés"
+              referrerpolicy="no-referrer"
+              (error)="onImageError('hero')"
+              class="w-full h-full object-cover"
+            />
+          } @else {
+            <div class="w-full h-full flex flex-col items-center justify-center p-8 text-center text-[#FFFDF9] bg-gradient-to-br from-[#7C2D12] to-[#1E1B18]">
+              <mat-icon class="!text-5xl !w-12 !h-12 text-[#F59E0B] mb-2">forest</mat-icon>
+              <p class="font-display text-lg font-semibold">L'Atelier du Père Noël Secret</p>
+            </div>
+          }
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-6 text-white">
+            <p class="text-xs font-medium text-amber-200">Compte à rebours de l'atelier</p>
+            <p class="font-display text-2xl font-bold mt-0.5">
+              Plus que <span class="font-mono-tabular">{{ daysUntilEvent() }}</span> jours avant l'ouverture des cadeaux
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bandeau de synthèse 4 colonnes (Chiffres tabulaires) -->
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 bg-white border border-[#E6DEC8] rounded-2xl p-5">
+        <div class="space-y-1 pr-4 lg:border-r border-[#E6DEC8]">
+          <p class="text-xs text-[#5C5346]">Participants inscrits</p>
+          <p class="font-mono-tabular text-2xl font-bold text-[#1E1B18]">
+            {{ store.giftStats().total }}
+          </p>
+          <p class="text-xs text-[#5C5346]">
+            {{ store.giftStats().revealed }} sur {{ store.giftStats().total }} ont ouvert leur enveloppe
+          </p>
+        </div>
+
+        <div class="space-y-1 lg:px-4 lg:border-r border-[#E6DEC8]">
+          <p class="text-xs text-[#5C5346]">Plafond cadeau conseillé</p>
+          <p class="font-mono-tabular text-2xl font-bold text-[#1E1B18]">
+            {{ evt.budget }} €
+          </p>
+          <p class="text-xs text-[#5C5346]">
+            {{ store.wishes().length }} idées cadeaux partagées
+          </p>
+        </div>
+
+        <div class="space-y-1 pr-4 lg:px-4 lg:border-r border-[#E6DEC8]">
+          <p class="text-xs text-[#5C5346]">Avancement de la hotte</p>
+          <p class="font-mono-tabular text-2xl font-bold text-[#166534]">
+            {{ store.giftStats().progressPercent }} %
+          </p>
+          <p class="text-xs text-[#5C5346]">
+            {{ store.giftStats().ready }} prêts · {{ store.giftStats().wrapped }} emballés · {{ store.giftStats().bought }} achetés
+          </p>
+        </div>
+
+        <div class="space-y-1 lg:pl-4">
+          <p class="text-xs text-[#5C5346]">Courriers anonymes</p>
+          <p class="font-mono-tabular text-2xl font-bold text-[#1E1B18]">
+            {{ store.messages().length }}
+          </p>
+          <p class="text-xs text-[#5C5346]">
+            Questions-réponses secrètes échangées
+          </p>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- VUE 1 : ATELIER & TIRAGE (Participants, Exclusions, Suivi Global)   -->
+      <!-- =================================================================== -->
+      @if (activeSection() === 'workshop') {
+        <div class="space-y-10">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <!-- Colonne gauche (7 cols) : Participants & Ajout -->
+            <div class="lg:col-span-7 bg-white border border-[#E6DEC8] rounded-2xl p-6 space-y-6">
+              <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[#E6DEC8] pb-4">
+                <div>
+                  <h2 class="font-display text-2xl font-bold text-[#1E1B18]">
+                    01. Lutins Participants &amp; Suivi Anonymisé
+                  </h2>
+                  <p class="text-sm text-[#5C5346] mt-0.5">
+                    Le statut affiché correspond à l'avancement du cadeau préparé <em>pour</em> chaque participant, sans révéler qui est son Père Noël.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Formulaire d'ajout de participant -->
+              <form
+                [formGroup]="participantForm"
+                (ngSubmit)="submitAddParticipant()"
+                class="grid grid-cols-1 sm:grid-cols-12 gap-3 bg-[#F7F2E7] p-4 rounded-xl"
+              >
+                <div class="sm:col-span-4">
+                  <label for="partName" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                    Prénom ou surnom
+                  </label>
+                  <input
+                    id="partName"
+                    type="text"
+                    formControlName="name"
+                    placeholder="Ex. Maxime"
+                    class="w-full px-3 py-2 text-sm bg-white border border-[#E6DEC8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C81E32]"
+                  />
+                </div>
+                <div class="sm:col-span-4">
+                  <label for="partNote" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                    Indice / Goûts (optionnel)
+                  </label>
+                  <input
+                    id="partNote"
+                    type="text"
+                    formControlName="roleNote"
+                    placeholder="Ex. Amateur de jazz & BD"
+                    class="w-full px-3 py-2 text-sm bg-white border border-[#E6DEC8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C81E32]"
+                  />
+                </div>
+                <div class="sm:col-span-2">
+                  <label for="partPin" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                    PIN (4 ch.)
+                  </label>
+                  <input
+                    id="partPin"
+                    type="text"
+                    maxlength="4"
+                    formControlName="pinCode"
+                    class="w-full px-3 py-2 text-sm font-mono-tabular bg-white border border-[#E6DEC8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C81E32]"
+                  />
+                </div>
+                <div class="sm:col-span-2 flex items-end">
+                  <button
+                    type="submit"
+                    [disabled]="participantForm.invalid"
+                    class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-[#1E1B18] hover:bg-[#3A342E] disabled:opacity-40 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer h-[38px]"
+                  >
+                    <mat-icon class="!text-base !w-4 !h-4">person_add</mat-icon>
+                    <span>Ajouter</span>
+                  </button>
+                </div>
+              </form>
+
+              <!-- Liste des participants et suivi anonymisé -->
+              @if (anonymizedRecipientProgress().length === 0) {
+                <div class="text-center py-8 text-sm text-[#5C5346]">
+                  Aucun participant inscrit pour le moment. Ajoutez au moins 3 participants ci-dessus.
+                </div>
+              } @else {
+                <div class="divide-y divide-[#E6DEC8]">
+                  @for (row of anonymizedRecipientProgress(); track row.recipient.id) {
+                    <div class="py-3.5 flex flex-wrap items-center justify-between gap-4">
+                      <div class="flex items-center gap-3.5 min-w-0">
+                        <div
+                          class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0"
+                          [style.background-color]="row.recipient.avatarColor"
+                        >
+                          {{ getParticipantInitials(row.recipient.name) }}
+                        </div>
+                        <div class="min-w-0">
+                          <p class="text-sm font-semibold text-[#1E1B18] truncate">
+                            {{ row.recipient.name }}
+                          </p>
+                          <p class="text-xs text-[#5C5346] truncate">
+                            {{ row.recipient.roleNote || 'Prêt pour le tirage Secret Santa' }}
+                            <span aria-hidden="true">·</span>
+                            <span>
+                              Cadeau qui lui est destiné :
+                              <strong class="text-[#1E1B18]">{{ getGiftStatusLabel(row.giftStatus) }}</strong>
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div class="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          (click)="copySecretParticipantLink(row.recipient)"
+                          class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[#1E1B18] bg-[#F7F2E7] hover:bg-[#EDE4D1] rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                        >
+                          <mat-icon class="!text-sm !w-4 !h-4">link</mat-icon>
+                          <span>Lien secret</span>
+                        </button>
+                        <button
+                          type="button"
+                          (click)="setSection('reveal'); openPinModal(row.recipient)"
+                          class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-[#C81E32] bg-[#FEF2F2] hover:bg-[#FEE2E2] rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                        >
+                          <mat-icon class="!text-sm !w-4 !h-4">lock_open</mat-icon>
+                          <span>Ouvrir carte</span>
+                        </button>
+                        @if (evt.status === 'draft') {
+                          <button
+                            type="button"
+                            (click)="store.removeParticipant(row.recipient.id)"
+                            aria-label="Retirer ce participant"
+                            class="inline-flex items-center p-1.5 text-[#5C5346] hover:text-[#C81E32] rounded-lg transition-colors cursor-pointer"
+                          >
+                            <mat-icon class="!text-base !w-4 !h-4">delete_outline</mat-icon>
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Colonne droite (5 cols) : Règles d'Exclusion & Moteur de Tirage -->
+            <div class="lg:col-span-5 bg-white border border-[#E6DEC8] rounded-2xl p-6 space-y-6">
+              <div class="border-b border-[#E6DEC8] pb-4">
+                <h2 class="font-display text-2xl font-bold text-[#1E1B18]">
+                  02. Règles d'Exclusion &amp; Tirage
+                </h2>
+                <p class="text-sm text-[#5C5346] mt-0.5">
+                  Évitez que les couples ou les binômes de l'an dernier ne se tirent au sort.
+                </p>
+              </div>
+
+              <!-- Ajout d'une exclusion -->
+              <form
+                [formGroup]="exclusionForm"
+                (ngSubmit)="submitExclusionRule()"
+                class="space-y-3 bg-[#F7F2E7] p-4 rounded-xl"
+              >
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label for="exclGiver" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                      Participant A
+                    </label>
+                    <select
+                      id="exclGiver"
+                      formControlName="giverId"
+                      class="w-full px-3 py-2 text-sm bg-white border border-[#E6DEC8] rounded-lg"
+                    >
+                      @for (p of store.participants(); track p.id) {
+                        <option [value]="p.id">{{ p.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div>
+                    <label for="exclReceiver" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                      Ne peut pas tirer B
+                    </label>
+                    <select
+                      id="exclReceiver"
+                      formControlName="excludedId"
+                      class="w-full px-3 py-2 text-sm bg-white border border-[#E6DEC8] rounded-lg"
+                    >
+                      @for (p of store.participants(); track p.id) {
+                        <option [value]="p.id">{{ p.name }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                  <label class="inline-flex items-center gap-2 text-xs font-medium text-[#1E1B18] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      formControlName="bidirectional"
+                      class="rounded border-[#E6DEC8] text-[#C81E32] focus:ring-[#C81E32]"
+                    />
+                    <span>Exclusion réciproque (couple A ↔ B)</span>
+                  </label>
+
+                  <button
+                    type="submit"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-[#1E1B18] hover:bg-[#3A342E] rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  >
+                    <mat-icon class="!text-base !w-4 !h-4">block</mat-icon>
+                    <span>Ajouter / Basculer la règle</span>
+                  </button>
+                </div>
+              </form>
+
+              <!-- Liste des exclusions actives -->
+              <div class="space-y-2">
+                <p class="text-xs font-semibold text-[#5C5346]">
+                  Exclusions actives ({{ exclusionPairs().length }}) :
+                </p>
+                @if (exclusionPairs().length === 0) {
+                  <p class="text-xs text-[#5C5346] italic">
+                    Aucune règle d'exclusion définie. Tous les participants peuvent se tirer mutuellement.
+                  </p>
+                } @else {
+                  <div class="divide-y divide-[#E6DEC8] border border-[#E6DEC8] rounded-xl px-3">
+                    @for (pair of exclusionPairs(); track pair.key) {
+                      <div class="py-2.5 flex items-center justify-between gap-2 text-xs">
+                        <div class="flex items-center gap-2 text-[#1E1B18]">
+                          <span class="font-semibold">{{ pair.giver.name }}</span>
+                          <span class="font-mono-tabular text-[#C81E32] font-bold">
+                            {{ pair.isMutual ? '↔' : '↛' }}
+                          </span>
+                          <span class="font-semibold">{{ pair.excluded.name }}</span>
+                          <span class="text-[#5C5346]">
+                            ({{ pair.isMutual ? 'Couple / Réciproque' : 'Sens unique' }})
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          (click)="removeExclusionPair(pair.giver.id, pair.excluded.id, pair.isMutual)"
+                          class="inline-flex items-center gap-1 text-[#C81E32] hover:underline font-medium whitespace-nowrap shrink-0 cursor-pointer"
+                        >
+                          <mat-icon class="!text-sm !w-3.5 !h-3.5">close</mat-icon>
+                          <span>Retirer</span>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <!-- ============================================================= -->
+              <!-- RÈGLE SECRÈTE : TIRAGE FORCÉ (Accessible & Visible Organisateur) -->
+              <!-- ============================================================= -->
+              <div class="pt-5 border-t border-[#E6DEC8] space-y-3.5">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-1.5 text-xs font-bold text-[#C81E32]">
+                    <mat-icon class="!text-base !w-4 !h-4">lock</mat-icon>
+                    <span>Règle Secrète : Tirage Forcé (Organisateur uniquement)</span>
+                  </div>
+                  <span class="text-xs text-[#5C5346] font-mono-tabular">
+                    {{ forcedAssignmentsList().length }} active(s)
+                  </span>
+                </div>
+
+                <p class="text-xs text-[#5C5346] leading-relaxed">
+                  Imposez qu'un participant précis offre obligatoirement à un destinataire précis. <strong>Ni le donneur ni le receveur ne sauront que le tirage a été forcé</strong>. Le reste du groupe sera tiré au sort automatiquement selon les règles d'exclusion.
+                </p>
+
+                <!-- Formulaire d'attribution forcée -->
+                <form
+                  [formGroup]="forcedMatchForm"
+                  (ngSubmit)="submitForcedAssignment()"
+                  class="bg-[#FFFDF9] border border-[#E6DEC8] p-3.5 rounded-xl space-y-3"
+                >
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                      <label for="forcedGiver" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                        Le donneur :
+                      </label>
+                      <select
+                        id="forcedGiver"
+                        formControlName="giverId"
+                        class="w-full px-2.5 py-1.5 text-xs bg-white border border-[#E6DEC8] rounded-lg"
+                      >
+                        @for (p of store.participants(); track p.id) {
+                          <option [value]="p.id">{{ p.name }}</option>
+                        }
+                      </select>
+                    </div>
+
+                    <div>
+                      <label for="forcedReceiver" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                        Offrira obligatoirement à :
+                      </label>
+                      <select
+                        id="forcedReceiver"
+                        formControlName="forcedReceiverId"
+                        class="w-full px-2.5 py-1.5 text-xs bg-white border border-[#E6DEC8] rounded-lg"
+                      >
+                        @for (p of store.participants(); track p.id) {
+                          <option [value]="p.id">{{ p.name }}</option>
+                        }
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="flex justify-end">
+                    <button
+                      type="submit"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#C81E32] hover:bg-[#A61728] rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                    >
+                      <mat-icon class="!text-sm !w-4 !h-4">verified</mat-icon>
+                      <span>Imposer ce tirage secret</span>
+                    </button>
+                  </div>
+                </form>
+
+                <!-- Liste des tirages forcés actifs -->
+                @if (forcedAssignmentsList().length > 0) {
+                  <div class="divide-y divide-[#E6DEC8] border border-[#E6DEC8] rounded-xl px-3 bg-white">
+                    @for (item of forcedAssignmentsList(); track item.giver.id) {
+                      <div class="py-2 flex items-center justify-between gap-2 text-xs">
+                        <div class="flex items-center gap-1.5 text-[#1E1B18]">
+                          <span class="font-semibold">{{ item.giver.name }}</span>
+                          <mat-icon class="!text-sm !w-3.5 !h-3.5 text-[#C81E32]">arrow_forward</mat-icon>
+                          <span class="font-semibold text-[#166534]">{{ item.receiver?.name || 'Inconnu' }}</span>
+                          <span class="text-[#5C5346]">(imposé)</span>
+                        </div>
+                        <button
+                          type="button"
+                          (click)="removeForcedAssignment(item.giver.id)"
+                          class="inline-flex items-center gap-1 text-[#C81E32] hover:underline font-medium whitespace-nowrap shrink-0 cursor-pointer"
+                        >
+                          <mat-icon class="!text-sm !w-3.5 !h-3.5">close</mat-icon>
+                          <span>Retirer</span>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <!-- Diagnostic mathématique & Bouton d'exécution du tirage -->
+              <div class="pt-4 border-t border-[#E6DEC8] space-y-4">
+                @if (store.drawCheck().isValid) {
+                  <div class="flex items-start gap-2.5 text-xs text-[#166534] bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl p-3.5">
+                    <mat-icon class="!text-base !w-4 !h-4 shrink-0 mt-0.5">check_circle</mat-icon>
+                    <span>
+                      <strong>Tirage mathématiquement valide :</strong> un cycle complet respectant toutes vos exclusions est prêt à être généré.
+                    </span>
+                  </div>
+                } @else {
+                  <div class="flex items-start gap-2.5 text-xs text-[#991B1B] bg-[#FEF2F2] border border-[#FECACA] rounded-xl p-3.5">
+                    <mat-icon class="!text-base !w-4 !h-4 shrink-0 mt-0.5">warning</mat-icon>
+                    <span>{{ store.drawCheck().errorMessage }}</span>
+                  </div>
+                }
+
+                <div class="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    [disabled]="!store.drawCheck().isValid"
+                    (click)="handleExecuteDraw()"
+                    class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-white bg-[#C81E32] hover:bg-[#A61728] disabled:opacity-40 rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  >
+                    <mat-icon class="!text-lg !w-5 !h-5">casino</mat-icon>
+                    <span>
+                      {{ evt.status === 'drawn' ? 'Relancer un Nouveau Tirage Secret' : 'Lancer le Tirage au Sort Secret' }}
+                    </span>
+                  </button>
+
+                  @if (evt.status === 'drawn') {
+                    <button
+                      type="button"
+                      (click)="store.resetDraw()"
+                      class="inline-flex items-center gap-1.5 px-3.5 py-3 text-xs font-semibold text-[#1E1B18] bg-[#F7F2E7] hover:bg-[#EDE4D1] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                    >
+                      <mat-icon class="!text-base !w-4 !h-4">restart_alt</mat-icon>
+                      <span>Réinitialiser</span>
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- =================================================================== -->
+      <!-- VUE 2 : CARTES & CODES PIN (Révélation Secrète & Mission)           -->
+      <!-- =================================================================== -->
+      @if (activeSection() === 'reveal') {
+        <div class="space-y-8">
+          <div class="flex flex-wrap items-end justify-between gap-4 border-b border-[#E6DEC8] pb-4">
+            <div>
+              <h2 class="font-display text-2xl sm:text-3xl font-bold text-[#1E1B18]">
+                Enveloppes Secrètes &amp; Codes PIN Individuels
+              </h2>
+              <p class="text-sm text-[#5C5346] mt-1">
+                Cliquez sur votre enveloppe personnelle et saisissez votre code PIN à 4 chiffres pour découvrir votre destinataire sans que personne d'autre ne le voie.
+              </p>
+            </div>
+
+            @if (!store.isCloudConnected()) {
+              <button
+                type="button"
+                (click)="showDemoPinHint.set(!showDemoPinHint())"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#F7F2E7] text-[#5C5346] rounded-lg whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                <mat-icon class="!text-sm !w-4 !h-4">key</mat-icon>
+                <span>{{ showDemoPinHint() ? 'Indice démo : PIN par défaut = 1234' : 'Afficher indice PIN démo' }}</span>
+              </button>
+            }
+          </div>
+
+          <!-- Panneau de Mission Déverrouillée (si un participant a saisi son code PIN) -->
+          @if (unlockedParticipant(); as me) {
+            <section class="bg-white border-2 border-[#166534] rounded-2xl p-6 sm:p-8 space-y-6">
+              <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[#E6DEC8] pb-4">
+                <div class="space-y-1">
+                  <p class="text-xs font-semibold text-[#166534]">
+                    Dossier confidentiel déverrouillé · Père Noël Secret : {{ me.name }}
+                  </p>
+                  @if (unlockedTargetParticipant(); as target) {
+                    <h3 class="font-display text-2xl sm:text-3xl font-bold text-[#1E1B18]">
+                      Votre mission secrète : offrir un cadeau à
+                      <span class="text-[#C81E32] underline decoration-[#C81E32]/30">{{ target.name }}</span>
+                    </h3>
+                    <p class="text-sm text-[#5C5346]">
+                      {{ target.roleNote || 'Préparez-lui une belle surprise dans le respect du budget de la fête !' }}
+                    </p>
+                  } @else {
+                    <h3 class="font-display text-2xl font-bold text-[#1E1B18]">
+                      Le tirage au sort n'a pas encore été lancé
+                    </h3>
+                    <p class="text-sm text-[#5C5346]">
+                      Rendez-vous dans l'onglet « Atelier &amp; Tirage » pour lancer l'attribution des cadeaux.
+                    </p>
+                  }
+                </div>
+
+                <button
+                  type="button"
+                  (click)="lockCurrentSession()"
+                  class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-[#1E1B18] hover:bg-[#3A342E] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <mat-icon class="!text-base !w-4 !h-4">lock</mat-icon>
+                  <span>Refermer mon enveloppe</span>
+                </button>
+              </div>
+
+              @if (unlockedTargetParticipant(); as target) {
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                  <!-- Étape du cadeau préparé par ce Père Noël -->
+                  <div class="lg:col-span-6 space-y-4">
+                    <h4 class="font-display text-lg font-bold text-[#1E1B18]">
+                      Avancement de votre cadeau pour {{ target.name }}
+                    </h4>
+                    <p class="text-xs text-[#5C5346]">
+                      Mettez à jour l'avancement : le groupe verra que le cadeau de {{ target.name }} avance, sans jamais savoir que c'est vous !
+                    </p>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      <button
+                        type="button"
+                        (click)="setMyGiftStatus('idea')"
+                        class="flex flex-col items-center gap-1.5 p-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer"
+                        [class.bg-[#1E1B18]]="me.giftStatus === 'idea'"
+                        [class.text-white]="me.giftStatus === 'idea'"
+                        [class.border-[#1E1B18]]="me.giftStatus === 'idea'"
+                        [class.bg-[#F7F2E7]]="me.giftStatus !== 'idea'"
+                        [class.text-[#1E1B18]]="me.giftStatus !== 'idea'"
+                        [class.border-[#E6DEC8]]="me.giftStatus !== 'idea'"
+                      >
+                        <mat-icon class="!text-lg !w-5 !h-5">lightbulb</mat-icon>
+                        <span class="whitespace-nowrap">1. En réflexion</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        (click)="setMyGiftStatus('bought')"
+                        class="flex flex-col items-center gap-1.5 p-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer"
+                        [class.bg-[#D97706]]="me.giftStatus === 'bought'"
+                        [class.text-white]="me.giftStatus === 'bought'"
+                        [class.border-[#D97706]]="me.giftStatus === 'bought'"
+                        [class.bg-[#F7F2E7]]="me.giftStatus !== 'bought'"
+                        [class.text-[#1E1B18]]="me.giftStatus !== 'bought'"
+                        [class.border-[#E6DEC8]]="me.giftStatus !== 'bought'"
+                      >
+                        <mat-icon class="!text-lg !w-5 !h-5">shopping_bag</mat-icon>
+                        <span class="whitespace-nowrap">2. Acheté</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        (click)="setMyGiftStatus('wrapped')"
+                        class="flex flex-col items-center gap-1.5 p-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer"
+                        [class.bg-[#C81E32]]="me.giftStatus === 'wrapped'"
+                        [class.text-white]="me.giftStatus === 'wrapped'"
+                        [class.border-[#C81E32]]="me.giftStatus === 'wrapped'"
+                        [class.bg-[#F7F2E7]]="me.giftStatus !== 'wrapped'"
+                        [class.text-[#1E1B18]]="me.giftStatus !== 'wrapped'"
+                        [class.border-[#E6DEC8]]="me.giftStatus !== 'wrapped'"
+                      >
+                        <mat-icon class="!text-lg !w-5 !h-5">redeem</mat-icon>
+                        <span class="whitespace-nowrap">3. Emballé</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        (click)="setMyGiftStatus('ready')"
+                        class="flex flex-col items-center gap-1.5 p-3 rounded-xl border text-xs font-semibold transition-colors cursor-pointer"
+                        [class.bg-[#166534]]="me.giftStatus === 'ready'"
+                        [class.text-white]="me.giftStatus === 'ready'"
+                        [class.border-[#166534]]="me.giftStatus === 'ready'"
+                        [class.bg-[#F7F2E7]]="me.giftStatus !== 'ready'"
+                        [class.text-[#1E1B18]]="me.giftStatus !== 'ready'"
+                        [class.border-[#E6DEC8]]="me.giftStatus !== 'ready'"
+                      >
+                        <mat-icon class="!text-lg !w-5 !h-5">park</mat-icon>
+                        <span class="whitespace-nowrap">4. Prêt !</span>
+                      </button>
+                    </div>
+
+                    <!-- Modification du code PIN personnel -->
+                    <form
+                      [formGroup]="changePinForm"
+                      (ngSubmit)="submitChangePin()"
+                      class="pt-4 border-t border-[#E6DEC8] flex flex-wrap items-end gap-3"
+                    >
+                      <div>
+                        <label for="newPinInput" class="block text-xs font-semibold text-[#5C5346] mb-1">
+                          Modifier mon code PIN secret (4 chiffres)
+                        </label>
+                        <input
+                          id="newPinInput"
+                          type="text"
+                          maxlength="4"
+                          formControlName="newPinCode"
+                          class="w-32 px-3 py-1.5 text-sm font-mono-tabular bg-[#F7F2E7] border border-[#E6DEC8] rounded-lg"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        [disabled]="changePinForm.invalid"
+                        class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#1E1B18] bg-[#F7F2E7] hover:bg-[#EDE4D1] rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                      >
+                        <mat-icon class="!text-base !w-4 !h-4">save</mat-icon>
+                        <span>Mettre à jour mon PIN</span>
+                      </button>
+                      <button
+                        type="button"
+                        (click)="setSection('messages'); activeChatChannel.set('to_target')"
+                        class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-[#C81E32] hover:bg-[#A61728] rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                      >
+                        <mat-icon class="!text-base !w-4 !h-4">mark_email_unread</mat-icon>
+                        <span>Écrire anonymement à {{ target.name }}</span>
+                      </button>
+                    </form>
+                  </div>
+
+                  <!-- Liste de souhaits de la cible -->
+                  <div class="lg:col-span-6 space-y-3 bg-[#F7F2E7] p-5 rounded-xl">
+                    <div class="flex items-center justify-between">
+                      <h4 class="font-display text-lg font-bold text-[#1E1B18]">
+                        Liste de souhaits de {{ target.name }} ({{ unlockedTargetWishes().length }})
+                      </h4>
+                      <span class="text-xs text-[#5C5346]">
+                        Budget max : <strong class="font-mono-tabular">{{ evt.budget }} €</strong>
+                      </span>
+                    </div>
+
+                    @if (unlockedTargetWishes().length === 0) {
+                      <p class="text-xs text-[#5C5346] py-4">
+                        {{ target.name }} n'a pas encore ajouté d'idée cadeau. Posez-lui une question anonyme via la Poste du Pôle Nord !
+                      </p>
+                    } @else {
+                      <div class="divide-y divide-[#E6DEC8]">
+                        @for (wish of unlockedTargetWishes(); track wish.id) {
+                          <div class="py-3 space-y-1">
+                            <div class="flex items-baseline justify-between gap-2">
+                              <p class="text-sm font-semibold text-[#1E1B18]">{{ wish.title }}</p>
+                              <span class="font-mono-tabular text-xs font-bold text-[#166534] shrink-0">
+                                ~{{ wish.estimatedPrice }} €
+                              </span>
+                            </div>
+                            @if (wish.details) {
+                              <p class="text-xs text-[#5C5346]">{{ wish.details }}</p>
+                            }
+                            <div class="flex items-center gap-2 text-xs text-[#5C5346]">
+                              <span>Priorité : {{ getPriorityLabel(wish.priority) }}</span>
+                              @if (wish.linkUrl) {
+                                <span aria-hidden="true">·</span>
+                                <a
+                                  [href]="wish.linkUrl"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  class="text-[#C81E32] font-semibold hover:underline inline-flex items-center gap-1"
+                                >
+                                  <span>Voir le lien marchand</span>
+                                  <mat-icon class="!text-xs !w-3 !h-3">open_in_new</mat-icon>
+                                </a>
+                              }
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </section>
+          }
+
+          <!-- Grille des Enveloppes de Participants -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            @for (p of store.participants(); track p.id) {
+              <div class="bg-white border border-[#E6DEC8] rounded-2xl overflow-hidden flex flex-col justify-between">
+                <div class="relative h-36 bg-[#F7F2E7] border-b border-[#E6DEC8] overflow-hidden">
+                  @if (!brokenImages()['env_' + p.id]) {
+                    <img
+                      [src]="envelopeImageUrl"
+                      [alt]="'Enveloppe scellée de ' + p.name"
+                      referrerpolicy="no-referrer"
+                      (error)="onImageError('env_' + p.id)"
+                      class="w-full h-full object-cover"
+                    />
+                  } @else {
+                    <div class="w-full h-full flex items-center justify-center bg-[#F7F2E7] text-[#C81E32]">
+                      <mat-icon class="!text-4xl !w-10 !h-10">mail</mat-icon>
+                    </div>
+                  }
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent p-4 flex items-end justify-between text-white">
+                    <div class="flex items-center gap-2.5">
+                      <span
+                        class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0"
+                        [style.background-color]="p.avatarColor"
+                      >
+                        {{ getParticipantInitials(p.name) }}
+                      </span>
+                      <span class="font-display text-lg font-bold truncate">{{ p.name }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-5 space-y-4 flex-1 flex flex-col justify-between">
+                  <div class="space-y-1.5">
+                    <div class="flex items-center gap-2 text-xs text-[#5C5346]">
+                      <span>{{ p.hasRevealed ? 'Enveloppe déjà consultée' : 'Enveloppe encore scellée' }}</span>
+                      <span aria-hidden="true">·</span>
+                      <span>Son cadeau préparé : <strong>{{ getGiftStatusLabel(p.giftStatus) }}</strong></span>
+                    </div>
+                    <p class="text-xs text-[#5C5346] line-clamp-2">
+                      {{ p.roleNote || 'Participant au Secret Santa' }}
+                    </p>
+                  </div>
+
+                  <div class="pt-3 border-t border-[#E6DEC8] flex items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      (click)="copySecretParticipantLink(p)"
+                      class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-[#1E1B18] bg-[#F7F2E7] hover:bg-[#EDE4D1] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                    >
+                      <mat-icon class="!text-base !w-4 !h-4">content_copy</mat-icon>
+                      <span>Copier lien</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      (click)="openPinModal(p)"
+                      class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-[#C81E32] hover:bg-[#A61728] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                    >
+                      <mat-icon class="!text-base !w-4 !h-4">
+                        {{ unlockedParticipantId() === p.id ? 'visibility' : 'lock_open' }}
+                      </mat-icon>
+                      <span>
+                        {{ unlockedParticipantId() === p.id ? 'Mission ouverte' : 'Déverrouiller (PIN)' }}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- =================================================================== -->
+      <!-- VUE 3 : LISTES DE SOUHAITS (Idées Cadeaux, Liens, Prix, Priorités)  -->
+      <!-- =================================================================== -->
+      @if (activeSection() === 'wishes') {
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <!-- Formulaire d'ajout de souhait (5 cols) -->
+          <div class="lg:col-span-5 bg-white border border-[#E6DEC8] rounded-2xl p-6 space-y-5">
+            <div class="border-b border-[#E6DEC8] pb-4">
+              <h2 class="font-display text-2xl font-bold text-[#1E1B18]">
+                Ajouter une Idée Cadeau
+              </h2>
+              <p class="text-sm text-[#5C5346] mt-0.5">
+                Aidez votre Père Noël Secret en précisant vos envies, tailles ou liens marchands dans le budget de <strong class="font-mono-tabular">{{ evt.budget }} €</strong>.
+              </p>
+            </div>
+
+            <form [formGroup]="wishForm" (ngSubmit)="submitWishItem()" class="space-y-4">
+              <div>
+                <label for="wishParticipant" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                  Pour la liste de souhaits de :
+                </label>
+                <select
+                  id="wishParticipant"
+                  formControlName="participantId"
+                  class="w-full px-3 py-2 text-sm bg-[#F7F2E7] border border-[#E6DEC8] rounded-xl"
+                >
+                  @for (p of store.participants(); track p.id) {
+                    <option [value]="p.id">{{ p.name }}</option>
+                  }
+                </select>
+              </div>
+
+              <div>
+                <label for="wishTitle" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                  Idée cadeau
+                </label>
+                <input
+                  id="wishTitle"
+                  type="text"
+                  formControlName="title"
+                  placeholder="Ex. Roman illustré, coffret de thé, jeu coopératif..."
+                  class="w-full px-3 py-2 text-sm bg-white border border-[#E6DEC8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C81E32]"
+                />
+              </div>
+
+              <div>
+                <label for="wishDetails" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                  Précisions utiles (taille, coloris, auteur, magasin)
+                </label>
+                <textarea
+                  id="wishDetails"
+                  rows="2"
+                  formControlName="details"
+                  placeholder="Ex. Taille M, couleur vert forêt, édition reliée..."
+                  class="w-full px-3 py-2 text-sm bg-white border border-[#E6DEC8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C81E32]"
+                ></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label for="wishPrice" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                    Prix estimé (€)
+                  </label>
+                  <input
+                    id="wishPrice"
+                    type="number"
+                    min="0"
+                    max="10000"
+                    formControlName="estimatedPrice"
+                    class="w-full px-3 py-2 text-sm font-mono-tabular bg-white border border-[#E6DEC8] rounded-xl"
+                  />
+                </div>
+
+                <div>
+                  <label for="wishPriority" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                    Niveau d'envie
+                  </label>
+                  <select
+                    id="wishPriority"
+                    formControlName="priority"
+                    class="w-full px-3 py-2 text-sm bg-white border border-[#E6DEC8] rounded-xl"
+                  >
+                    <option value="dream">Rêve absolu</option>
+                    <option value="high">Coup de cœur</option>
+                    <option value="normal">Idée classique</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label for="wishLink" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                  Lien marchand (optionnel)
+                </label>
+                <input
+                  id="wishLink"
+                  type="url"
+                  formControlName="linkUrl"
+                  placeholder="https://..."
+                  class="w-full px-3 py-2 text-sm bg-white border border-[#E6DEC8] rounded-xl"
+                />
+              </div>
+
+              <button
+                type="submit"
+                [disabled]="wishForm.invalid"
+                class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-white bg-[#C81E32] hover:bg-[#A61728] disabled:opacity-40 rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                <mat-icon class="!text-lg !w-5 !h-5">add_shopping_cart</mat-icon>
+                <span>Ajouter à la Liste au Père Noël</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Consultation & Filtrage des listes de souhaits (7 cols) -->
+          <div class="lg:col-span-7 bg-white border border-[#E6DEC8] rounded-2xl p-6 space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[#E6DEC8] pb-4">
+              <div>
+                <h2 class="font-display text-2xl font-bold text-[#1E1B18]">
+                  Registre des Listes de Souhaits
+                </h2>
+                <p class="text-sm text-[#5C5346] mt-0.5">
+                  Filtrez par participant pour puiser de l'inspiration ou vérifier le respect du budget.
+                </p>
+              </div>
+
+              <!-- Tri -->
+              <div class="flex items-center gap-1 p-1 bg-[#F7F2E7] rounded-xl">
+                <button
+                  type="button"
+                  (click)="wishSortOrder.set('priority')"
+                  class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  [class.bg-white]="wishSortOrder() === 'priority'"
+                  [class.text-[#1E1B18]]="wishSortOrder() === 'priority'"
+                  [class.font-semibold]="wishSortOrder() === 'priority'"
+                  [class.text-[#5C5346]]="wishSortOrder() !== 'priority'"
+                >
+                  Par priorité
+                </button>
+                <button
+                  type="button"
+                  (click)="wishSortOrder.set('priceAsc')"
+                  class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  [class.bg-white]="wishSortOrder() === 'priceAsc'"
+                  [class.text-[#1E1B18]]="wishSortOrder() === 'priceAsc'"
+                  [class.font-semibold]="wishSortOrder() === 'priceAsc'"
+                  [class.text-[#5C5346]]="wishSortOrder() !== 'priceAsc'"
+                >
+                  Prix croissant
+                </button>
+              </div>
+            </div>
+
+            <!-- Barre de filtres par participant (boutons fonctionnels) -->
+            <div class="flex flex-wrap items-center gap-1.5 p-1.5 bg-[#F7F2E7] rounded-xl">
+              <button
+                type="button"
+                (click)="selectedWishParticipantId.set('ALL')"
+                class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                [class.bg-white]="selectedWishParticipantId() === 'ALL'"
+                [class.text-[#1E1B18]]="selectedWishParticipantId() === 'ALL'"
+                [class.font-semibold]="selectedWishParticipantId() === 'ALL'"
+                [class.text-[#5C5346]]="selectedWishParticipantId() !== 'ALL'"
+              >
+                Tous ({{ store.wishes().length }})
+              </button>
+              @for (p of store.participants(); track p.id) {
+                <button
+                  type="button"
+                  (click)="selectedWishParticipantId.set(p.id)"
+                  class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  [class.bg-white]="selectedWishParticipantId() === p.id"
+                  [class.text-[#1E1B18]]="selectedWishParticipantId() === p.id"
+                  [class.font-semibold]="selectedWishParticipantId() === p.id"
+                  [class.text-[#5C5346]]="selectedWishParticipantId() !== p.id"
+                >
+                  {{ p.name }}
+                </button>
+              }
+            </div>
+
+            <!-- Liste des souhaits -->
+            @if (filteredWishes().length === 0) {
+              <div class="text-center py-10 space-y-2 text-sm text-[#5C5346]">
+                <mat-icon class="!text-3xl !w-8 !h-8 text-[#D97706]">redeem</mat-icon>
+                <p>Aucune idée cadeau enregistrée pour ce filtre. Ajoutez un souhait via le formulaire ci-contre !</p>
+              </div>
+            } @else {
+              <div class="divide-y divide-[#E6DEC8]">
+                @for (wish of filteredWishes(); track wish.id) {
+                  <div class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                      <!-- Métadonnées épurées avec séparateurs typographiques -->
+                      <div class="flex flex-wrap items-center gap-2 text-xs text-[#5C5346]">
+                        <span class="font-semibold text-[#1E1B18]">{{ getParticipantName(wish.participantId) }}</span>
+                        <span aria-hidden="true">·</span>
+                        <span>{{ getPriorityLabel(wish.priority) }}</span>
+                        <span aria-hidden="true">·</span>
+                        @if (wish.estimatedPrice <= evt.budget) {
+                          <span class="text-[#166534] font-medium">Respecte le budget ({{ evt.budget }} € max)</span>
+                        } @else {
+                          <span class="text-[#D97706] font-medium">Au-dessus du budget indicatif</span>
+                        }
+                      </div>
+
+                      <h3 class="text-base font-semibold text-[#1E1B18]">
+                        {{ wish.title }}
+                      </h3>
+
+                      @if (wish.details) {
+                        <p class="text-xs text-[#5C5346]">{{ wish.details }}</p>
+                      }
+
+                      @if (wish.linkUrl) {
+                        <a
+                          [href]="wish.linkUrl"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="inline-flex items-center gap-1 text-xs font-semibold text-[#C81E32] hover:underline pt-0.5"
+                        >
+                          <mat-icon class="!text-sm !w-3.5 !h-3.5">open_in_new</mat-icon>
+                          <span>Consulter la référence en ligne</span>
+                        </a>
+                      }
+                    </div>
+
+                    <div class="flex items-center gap-3 shrink-0">
+                      <div class="text-right">
+                        <span class="font-mono-tabular text-lg font-bold text-[#1E1B18]">
+                          {{ wish.estimatedPrice }} €
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        (click)="store.deleteWishItem(wish.id)"
+                        aria-label="Supprimer ce souhait"
+                        class="inline-flex items-center p-2 text-[#5C5346] hover:text-[#C81E32] rounded-lg transition-colors cursor-pointer"
+                      >
+                        <mat-icon class="!text-base !w-4 !h-4">delete_outline</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- =================================================================== -->
+      <!-- VUE 4 : POSTE ANONYME (Messagerie Bidirectionnelle Secrète)         -->
+      <!-- =================================================================== -->
+      @if (activeSection() === 'messages') {
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <!-- Colonne gauche (4 cols) : Illustration Boîte aux Lettres & Identité -->
+          <div class="lg:col-span-4 bg-white border border-[#E6DEC8] rounded-2xl overflow-hidden">
+            <div class="relative h-48 bg-[#1E1B18]">
+              @if (!brokenImages()['mailbox']) {
+                <img
+                  [src]="mailboxImageUrl"
+                  alt="Illustration de la boîte aux lettres du Pôle Nord sous la neige"
+                  referrerpolicy="no-referrer"
+                  (error)="onImageError('mailbox')"
+                  class="w-full h-full object-cover"
+                />
+              } @else {
+                <div class="w-full h-full flex items-center justify-center text-amber-300">
+                  <mat-icon class="!text-5xl !w-12 !h-12">markunread_mailbox</mat-icon>
+                </div>
+              }
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-5 flex flex-col justify-end text-white">
+                <h2 class="font-display text-2xl font-bold">Bureau de Poste Anonyme</h2>
+                <p class="text-xs text-amber-100 mt-0.5">
+                  Posez vos questions sans jamais dévoiler votre écriture ni votre identité.
+                </p>
+              </div>
+            </div>
+
+            <div class="p-5 space-y-4">
+              @if (unlockedParticipant(); as me) {
+                <div class="space-y-2">
+                  <p class="text-xs text-[#5C5346]">Boîte aux lettres ouverte pour :</p>
+                  <div class="flex items-center justify-between p-3 bg-[#F7F2E7] rounded-xl">
+                    <div class="flex items-center gap-2.5">
+                      <span
+                        class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold"
+                        [style.background-color]="me.avatarColor"
+                      >
+                        {{ getParticipantInitials(me.name) }}
+                      </span>
+                      <div>
+                        <p class="text-sm font-bold text-[#1E1B18]">{{ me.name }}</p>
+                        <p class="text-xs text-[#166534]">PIN vérifié</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      (click)="lockCurrentSession()"
+                      class="inline-flex items-center gap-1 text-xs font-semibold text-[#C81E32] hover:underline whitespace-nowrap shrink-0 cursor-pointer"
+                    >
+                      <mat-icon class="!text-sm !w-3.5 !h-3.5">lock</mat-icon>
+                      <span>Changer</span>
+                    </button>
+                  </div>
+                </div>
+              } @else {
+                <div class="space-y-3">
+                  <p class="text-xs font-semibold text-[#1E1B18]">
+                    Déverrouillez votre identité avec votre code PIN pour accéder à vos courriers secrets :
+                  </p>
+                  <div class="space-y-1.5">
+                    @for (p of store.participants(); track p.id) {
+                      <button
+                        type="button"
+                        (click)="openPinModal(p)"
+                        class="w-full flex items-center justify-between px-3.5 py-2.5 text-xs font-semibold bg-[#F7F2E7] hover:bg-[#EDE4D1] text-[#1E1B18] rounded-xl transition-colors cursor-pointer"
+                      >
+                        <span>Ouvrir la boîte de {{ p.name }}</span>
+                        <mat-icon class="!text-base !w-4 !h-4 text-[#C81E32]">lock_open</mat-icon>
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Colonne droite (8 cols) : Les 2 Canaux de Conversation Anonyme -->
+          <div class="lg:col-span-8 bg-white border border-[#E6DEC8] rounded-2xl p-6 space-y-6">
+            @if (!unlockedParticipant()) {
+              <div class="text-center py-14 space-y-3">
+                <mat-icon class="!text-4xl !w-10 !h-10 text-[#C81E32]">mail_lock</mat-icon>
+                <h3 class="font-display text-xl font-bold text-[#1E1B18]">
+                  Accès protégé par code PIN
+                </h3>
+                <p class="text-sm text-[#5C5346] max-w-md mx-auto">
+                  Pour garantir le secret des échanges, sélectionnez votre nom dans la colonne de gauche et entrez votre code PIN à 4 chiffres.
+                </p>
+              </div>
+            } @else {
+              <!-- Sélecteur de canal (Vers ma Cible vs De mon Père Noël Secret) -->
+              <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[#E6DEC8] pb-4">
+                <div class="flex items-center gap-1.5 p-1 bg-[#F7F2E7] rounded-xl">
+                  <button
+                    type="button"
+                    (click)="activeChatChannel.set('to_target')"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                    [class.bg-[#C81E32]]="activeChatChannel() === 'to_target'"
+                    [class.text-white]="activeChatChannel() === 'to_target'"
+                    [class.text-[#1E1B18]]="activeChatChannel() !== 'to_target'"
+                  >
+                    <mat-icon class="!text-base !w-4 !h-4">redeem</mat-icon>
+                    <span>
+                      Discussion avec ma Cible ({{ unlockedTargetParticipant()?.name || 'Non tirée' }})
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    (click)="activeChatChannel.set('from_santa')"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                    [class.bg-[#166534]]="activeChatChannel() === 'from_santa'"
+                    [class.text-white]="activeChatChannel() === 'from_santa'"
+                    [class.text-[#1E1B18]]="activeChatChannel() !== 'from_santa'"
+                  >
+                    <mat-icon class="!text-base !w-4 !h-4">auto_awesome</mat-icon>
+                    <span>Discussion avec mon Père Noël Secret</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Explication contextuelle du canal -->
+              <div class="text-xs text-[#5C5346] bg-[#F7F2E7] p-3.5 rounded-xl">
+                @if (activeChatChannel() === 'to_target') {
+                  <span>
+                    <strong>Mode Père Noël Secret :</strong> Vous écrivez anonymement à
+                    <strong class="text-[#1E1B18]">{{ unlockedTargetParticipant()?.name }}</strong>.
+                    Vos messages s'affichent chez lui/elle sous le pseudonyme <em>« Votre Père Noël Secret »</em>.
+                  </span>
+                } @else {
+                  <span>
+                    <strong>Mode Destinataire :</strong> Vous discutez avec la personne mystère qui vous a tiré(e) au sort.
+                    Son identité reste strictement masquée !
+                  </span>
+                }
+              </div>
+
+              <!-- Fil de messages -->
+              <div class="space-y-3 max-h-[360px] overflow-y-auto pr-1">
+                @if (activeThreadMessages().length === 0) {
+                  <div class="text-center py-8 text-xs text-[#5C5346]">
+                    Aucun message dans ce canal pour l'instant. Utilisez une question rapide ci-dessous pour briser la glace !
+                  </div>
+                } @else {
+                  @for (msg of activeThreadMessages(); track msg.id) {
+                    <div
+                      class="p-4 rounded-xl border space-y-1"
+                      [class.bg-[#FEF2F2]]="msg.senderRole === 'santa'"
+                      [class.border-[#FECACA]]="msg.senderRole === 'santa'"
+                      [class.bg-[#F0FDF4]]="msg.senderRole === 'recipient'"
+                      [class.border-[#BBF7D0]]="msg.senderRole === 'recipient'"
+                    >
+                      <div class="flex items-center justify-between text-xs text-[#5C5346]">
+                        <span class="font-semibold text-[#1E1B18]">
+                          @if (msg.senderRole === 'santa') {
+                            Père Noël Secret
+                            {{ activeChatChannel() === 'to_target' ? '(Vous)' : '(Identité masquée)' }}
+                          } @else {
+                            Destinataire
+                            {{ activeChatChannel() === 'from_santa' ? '(Vous)' : '(' + (unlockedTargetParticipant()?.name || '') + ')' }}
+                          }
+                        </span>
+                        <span class="font-mono-tabular">{{ formatMessageTime(msg.createdAtIso) }}</span>
+                      </div>
+                      <p class="text-sm text-[#1E1B18] leading-relaxed">{{ msg.content }}</p>
+                    </div>
+                  }
+                }
+              </div>
+
+              <!-- Suggestions rapides de questions (uniquement quand on écrit à sa cible) -->
+              @if (activeChatChannel() === 'to_target') {
+                <div class="space-y-1.5">
+                  <p class="text-xs font-semibold text-[#5C5346]">Questions rapides d'atelier :</p>
+                  <div class="flex flex-wrap gap-1.5">
+                    @for (prompt of quickPrompts; track prompt) {
+                      <button
+                        type="button"
+                        (click)="useQuickPrompt(prompt)"
+                        class="px-2.5 py-1 text-xs bg-[#F7F2E7] hover:bg-[#EDE4D1] text-[#1E1B18] rounded-lg transition-colors text-left cursor-pointer"
+                      >
+                        {{ prompt }}
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Formulaire d'envoi de message anonyme -->
+              <form
+                [formGroup]="messageForm"
+                (ngSubmit)="submitAnonymousMessage()"
+                class="flex flex-col sm:flex-row gap-3 pt-2 border-t border-[#E6DEC8]"
+              >
+                <input
+                  type="text"
+                  formControlName="content"
+                  placeholder="Écrivez votre message anonyme ici..."
+                  class="flex-1 px-4 py-2.5 text-sm bg-white border border-[#E6DEC8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C81E32]"
+                />
+                <button
+                  type="submit"
+                  [disabled]="messageForm.invalid"
+                  class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-[#C81E32] hover:bg-[#A61728] disabled:opacity-40 rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <mat-icon class="!text-base !w-4 !h-4">send</mat-icon>
+                  <span>Envoyer anonymement</span>
+                </button>
+              </form>
+            }
+          </div>
+        </div>
+      }
+    } @else {
+      <!-- État vide : Aucun atelier actif -->
+      <section class="bg-white border border-[#E6DEC8] rounded-2xl p-10 text-center space-y-4 max-w-lg mx-auto my-12">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-[#FEF3C7] text-[#D97706] flex items-center justify-center">
+          <mat-icon class="!text-3xl !w-8 !h-8">celebration</mat-icon>
+        </div>
+        <h2 class="font-display text-2xl font-bold text-[#1E1B18]">
+          Aucun atelier actif
+        </h2>
+        <p class="text-sm text-[#5C5346] leading-relaxed">
+          Tous les ateliers ont été supprimés ou aucun n'est encore sélectionné. Vous pouvez créer un nouvel atelier ou importer l'atelier d'exemple.
+        </p>
+        <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <button
+            type="button"
+            (click)="openNewEventModal()"
+            class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-[#C81E32] rounded-xl hover:bg-[#A61728] transition-colors cursor-pointer"
+          >
+            <mat-icon class="!text-base !w-4 !h-4">add_circle</mat-icon>
+            <span>Créer un Nouvel Atelier</span>
+          </button>
+          @if (store.isCloudConnected()) {
+            <button
+              type="button"
+              (click)="store.seedDemoEventToCloud()"
+              class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-[#166534] bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl hover:bg-[#DCFCE7] transition-colors cursor-pointer"
+            >
+              <mat-icon class="!text-base !w-4 !h-4">cloud_upload</mat-icon>
+              <span>Importer l'Atelier d'Exemple</span>
+            </button>
+          }
+        </div>
+      </section>
+    }
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- MODALE DE DÉVERROUILLAGE PAR CODE PIN                                 -->
+  <!-- ===================================================================== -->
+  @if (selectedParticipantForPin(); as targetPart) {
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pinModalTitle"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4"
+    >
+      <div class="bg-white border border-[#E6DEC8] rounded-2xl max-w-md w-full p-6 space-y-5 shadow-xl">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="text-xs font-semibold text-[#C81E32]">Sceau de confidentialité</p>
+            <h3 id="pinModalTitle" class="font-display text-2xl font-bold text-[#1E1B18] mt-0.5">
+              Enveloppe de {{ targetPart.name }}
+            </h3>
+          </div>
+          <button
+            type="button"
+            (click)="closePinModal()"
+            aria-label="Fermer la fenêtre"
+            class="p-1.5 text-[#5C5346] hover:text-[#1E1B18] rounded-lg cursor-pointer"
+          >
+            <mat-icon class="!text-lg !w-5 !h-5">close</mat-icon>
+          </button>
+        </div>
+
+        <p class="text-sm text-[#5C5346]">
+          Entrez votre code PIN personnel à 4 chiffres pour briser le sceau de cire et révéler votre mission secrète.
+        </p>
+
+        @if (!store.isCloudConnected()) {
+          <div class="flex items-center justify-between bg-[#F7F2E7] px-3.5 py-2 rounded-xl text-xs text-[#5C5346]">
+            <span>Code PIN de cet atelier de démo : <strong class="font-mono-tabular text-[#1E1B18]">{{ targetPart.pinCode }}</strong></span>
+            <button
+              type="button"
+              (click)="fillDemoPin(targetPart.pinCode)"
+              class="text-[#C81E32] font-semibold hover:underline whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              Remplir automatiquement
+            </button>
+          </div>
+        }
+
+        <form [formGroup]="pinUnlockForm" (ngSubmit)="submitPinUnlock()" class="space-y-4">
+          <div>
+            <label for="pinUnlockInput" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+              Code PIN à 4 chiffres
+            </label>
+            <input
+              id="pinUnlockInput"
+              type="password"
+              inputmode="numeric"
+              maxlength="4"
+              formControlName="pinCode"
+              placeholder="••••"
+              class="w-full px-4 py-3 text-center text-2xl font-mono-tabular tracking-widest bg-[#F7F2E7] border border-[#E6DEC8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C81E32]"
+            />
+          </div>
+
+          @if (pinError(); as err) {
+            <p class="text-xs font-semibold text-[#991B1B]">{{ err }}</p>
+          }
+
+          <div class="flex items-center justify-end gap-3 pt-2">
+            <button
+              type="button"
+              (click)="closePinModal()"
+              class="px-4 py-2.5 text-xs font-semibold text-[#5C5346] hover:text-[#1E1B18] rounded-xl whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              [disabled]="pinUnlockForm.invalid"
+              class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-[#C81E32] hover:bg-[#A61728] disabled:opacity-40 rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              <mat-icon class="!text-base !w-4 !h-4">lock_open</mat-icon>
+              <span>Briser le sceau et révéler</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ===================================================================== -->
+  <!-- MODALE DE CRÉATION D'UN NOUVEL ÉVÉNEMENT                              -->
+  <!-- ===================================================================== -->
+  @if (showNewEventModal()) {
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="newEventModalTitle"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4"
+    >
+      <div class="bg-white border border-[#E6DEC8] rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-xl">
+        <div class="flex items-start justify-between gap-4 border-b border-[#E6DEC8] pb-3">
+          <div>
+            <p class="text-xs font-semibold text-[#166534]">Nouvelle fête</p>
+            <h3 id="newEventModalTitle" class="font-display text-2xl font-bold text-[#1E1B18]">
+              Ouvrir un Nouvel Atelier Secret Santa
+            </h3>
+          </div>
+          <button
+            type="button"
+            (click)="closeNewEventModal()"
+            aria-label="Fermer la modale"
+            class="p-1.5 text-[#5C5346] hover:text-[#1E1B18] rounded-lg cursor-pointer"
+          >
+            <mat-icon class="!text-lg !w-5 !h-5">close</mat-icon>
+          </button>
+        </div>
+
+        <form [formGroup]="newEventForm" (ngSubmit)="submitNewEvent()" class="space-y-4">
+          <div>
+            <label for="evtTitle" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+              Nom de l'événement
+            </label>
+            <input
+              id="evtTitle"
+              type="text"
+              formControlName="title"
+              class="w-full px-3.5 py-2 text-sm bg-white border border-[#E6DEC8] rounded-xl"
+            />
+          </div>
+
+          <div>
+            <label for="evtSubtitle" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+              Message d'accueil ou thème
+            </label>
+            <input
+              id="evtSubtitle"
+              type="text"
+              formControlName="subtitle"
+              class="w-full px-3.5 py-2 text-sm bg-white border border-[#E6DEC8] rounded-xl"
+            />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label for="evtDate" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                Date de l'échange
+              </label>
+              <input
+                id="evtDate"
+                type="date"
+                formControlName="eventDate"
+                class="w-full px-3 py-2 text-sm font-mono-tabular bg-white border border-[#E6DEC8] rounded-xl"
+              />
+            </div>
+
+            <div>
+              <label for="evtBudget" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                Budget conseillé (€)
+              </label>
+              <input
+                id="evtBudget"
+                type="number"
+                min="1"
+                max="10000"
+                formControlName="budget"
+                class="w-full px-3 py-2 text-sm font-mono-tabular bg-white border border-[#E6DEC8] rounded-xl"
+              />
+            </div>
+
+            <div>
+              <label for="evtLocation" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                Lieu
+              </label>
+              <input
+                id="evtLocation"
+                type="text"
+                formControlName="location"
+                class="w-full px-3 py-2 text-sm bg-white border border-[#E6DEC8] rounded-xl"
+              />
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-3 pt-3 border-t border-[#E6DEC8]">
+            <button
+              type="button"
+              (click)="closeNewEventModal()"
+              class="px-4 py-2 text-xs font-semibold text-[#5C5346] hover:text-[#1E1B18] rounded-xl whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              [disabled]="newEventForm.invalid"
+              class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-[#C81E32] hover:bg-[#A61728] disabled:opacity-40 rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              <mat-icon class="!text-base !w-4 !h-4">celebration</mat-icon>
+              <span>Créer l'Atelier Secret Santa</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ===================================================================== -->
+  <!-- MODALE D'AUTHENTIFICATION DE L'ORGANISATEUR (Google SSO & Email/MDP)  -->
+  <!-- ===================================================================== -->
+  @if (showAuthModal()) {
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="authModalTitle"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4"
+    >
+      <div class="bg-white border border-[#E6DEC8] rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+        <div class="flex items-start justify-between gap-4 border-b border-[#E6DEC8] pb-3">
+          <div>
+            <p class="text-xs font-semibold text-[#C81E32]">Espace Organisateur</p>
+            <h3 id="authModalTitle" class="font-display text-2xl font-bold text-[#1E1B18] mt-0.5">
+              Accès &amp; Sauvegarde Cloud
+            </h3>
+          </div>
+          <button
+            type="button"
+            (click)="closeAuthModal()"
+            aria-label="Fermer la modale"
+            class="p-1.5 text-[#5C5346] hover:text-[#1E1B18] rounded-lg cursor-pointer"
+          >
+            <mat-icon class="!text-lg !w-5 !h-5">close</mat-icon>
+          </button>
+        </div>
+
+        <p class="text-xs text-[#5C5346]">
+          Connectez-vous pour synchroniser vos événements en direct, retrouver vos tirages sur tous vos appareils et gérer les règles secrètes.
+        </p>
+
+        <!-- Option 1 : Connexion rapide SSO avec Google -->
+        <button
+          type="button"
+          (click)="handleGoogleSSO()"
+          [disabled]="isSubmittingAuth()"
+          class="w-full inline-flex items-center justify-center gap-3 px-4 py-2.5 text-sm font-semibold text-[#1E1B18] bg-white border border-[#E6DEC8] hover:bg-[#F7F2E7] rounded-xl transition-colors shadow-xs cursor-pointer"
+        >
+          <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Continuer avec Google (SSO)</span>
+        </button>
+
+        <div class="flex items-center gap-3">
+          <div class="flex-1 h-px bg-[#E6DEC8]"></div>
+          <span class="text-xs text-[#5C5346] uppercase tracking-wider">ou avec votre adresse e-mail</span>
+          <div class="flex-1 h-px bg-[#E6DEC8]"></div>
+        </div>
+
+        @if (!showForgotPassword()) {
+          <!-- Onglets Connexion / Inscription -->
+          <div class="flex p-1 bg-[#F7F2E7] rounded-xl text-xs font-semibold">
+            <button
+              type="button"
+              (click)="setAuthTab('signin')"
+              class="flex-1 py-1.5 rounded-lg text-center transition-colors cursor-pointer"
+              [class.bg-white]="authTab() === 'signin'"
+              [class.text-[#1E1B18]]="authTab() === 'signin'"
+              [class.shadow-xs]="authTab() === 'signin'"
+              [class.text-[#5C5346]]="authTab() !== 'signin'"
+            >
+              Se connecter
+            </button>
+            <button
+              type="button"
+              (click)="setAuthTab('register')"
+              class="flex-1 py-1.5 rounded-lg text-center transition-colors cursor-pointer"
+              [class.bg-white]="authTab() === 'register'"
+              [class.text-[#1E1B18]]="authTab() === 'register'"
+              [class.shadow-xs]="authTab() === 'register'"
+              [class.text-[#5C5346]]="authTab() !== 'register'"
+            >
+              Créer un compte
+            </button>
+          </div>
+
+          <!-- Formulaire : Se connecter avec email/mot de passe -->
+          @if (authTab() === 'signin') {
+            <form [formGroup]="authEmailForm" (ngSubmit)="submitSignInEmail()" class="space-y-3.5">
+              <div>
+                <label for="signinEmail" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                  Adresse e-mail
+                </label>
+                <input
+                  id="signinEmail"
+                  type="email"
+                  autocomplete="email"
+                  formControlName="email"
+                  placeholder="organisateur@exemple.com"
+                  class="w-full px-3.5 py-2 text-sm bg-white border border-[#E6DEC8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C81E32]"
+                />
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label for="signinPassword" class="block text-xs font-semibold text-[#1E1B18]">
+                    Mot de passe
+                  </label>
+                  <button
+                    type="button"
+                    (click)="showForgotPassword.set(true)"
+                    class="text-xs text-[#C81E32] hover:underline cursor-pointer"
+                  >
+                    Mot de passe oublié ?
+                  </button>
+                </div>
+                <input
+                  id="signinPassword"
+                  type="password"
+                  autocomplete="current-password"
+                  formControlName="password"
+                  placeholder="••••••••"
+                  class="w-full px-3.5 py-2 text-sm bg-white border border-[#E6DEC8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C81E32]"
+                />
+              </div>
+
+              <button
+                type="submit"
+                [disabled]="authEmailForm.invalid || isSubmittingAuth()"
+                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-[#C81E32] hover:bg-[#A61728] disabled:opacity-40 rounded-xl transition-colors cursor-pointer"
+              >
+                <mat-icon class="!text-base !w-4 !h-4">login</mat-icon>
+                <span>{{ isSubmittingAuth() ? 'Connexion en cours...' : 'Se connecter' }}</span>
+              </button>
+            </form>
+          }
+
+          <!-- Formulaire : Créer un compte avec email/mot de passe -->
+          @if (authTab() === 'register') {
+            <form [formGroup]="authRegisterForm" (ngSubmit)="submitRegisterEmail()" class="space-y-3.5">
+              <div>
+                <label for="registerName" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                  Nom ou prénom
+                </label>
+                <input
+                  id="registerName"
+                  type="text"
+                  autocomplete="name"
+                  formControlName="name"
+                  placeholder="Ex. Camille Moreau"
+                  class="w-full px-3.5 py-2 text-sm bg-white border border-[#E6DEC8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C81E32]"
+                />
+              </div>
+
+              <div>
+                <label for="registerEmail" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                  Adresse e-mail
+                </label>
+                <input
+                  id="registerEmail"
+                  type="email"
+                  autocomplete="email"
+                  formControlName="email"
+                  placeholder="organisateur@exemple.com"
+                  class="w-full px-3.5 py-2 text-sm bg-white border border-[#E6DEC8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C81E32]"
+                />
+              </div>
+
+              <div>
+                <label for="registerPassword" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                  Mot de passe (6 caractères min.)
+                </label>
+                <input
+                  id="registerPassword"
+                  type="password"
+                  autocomplete="new-password"
+                  formControlName="password"
+                  placeholder="••••••••"
+                  class="w-full px-3.5 py-2 text-sm bg-white border border-[#E6DEC8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C81E32]"
+                />
+              </div>
+
+              <button
+                type="submit"
+                [disabled]="authRegisterForm.invalid || isSubmittingAuth()"
+                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-[#166534] hover:bg-[#14532D] disabled:opacity-40 rounded-xl transition-colors cursor-pointer"
+              >
+                <mat-icon class="!text-base !w-4 !h-4">person_add</mat-icon>
+                <span>{{ isSubmittingAuth() ? 'Création en cours...' : 'Créer mon compte organisateur' }}</span>
+              </button>
+            </form>
+          }
+        } @else {
+          <!-- Formulaire : Mot de passe oublié -->
+          <form [formGroup]="forgotPasswordForm" (ngSubmit)="submitForgotPassword()" class="space-y-3.5">
+            <p class="text-xs text-[#5C5346]">
+              Indiquez l'adresse e-mail de votre compte organisateur. Un lien sécurisé de réinitialisation vous sera envoyé.
+            </p>
+
+            <div>
+              <label for="forgotEmailInput" class="block text-xs font-semibold text-[#1E1B18] mb-1">
+                Adresse e-mail
+              </label>
+              <input
+                id="forgotEmailInput"
+                type="email"
+                formControlName="email"
+                placeholder="votre-email@exemple.com"
+                class="w-full px-3.5 py-2 text-sm bg-white border border-[#E6DEC8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C81E32]"
+              />
+            </div>
+
+            <div class="flex items-center justify-between gap-3 pt-1">
+              <button
+                type="button"
+                (click)="showForgotPassword.set(false)"
+                class="text-xs text-[#5C5346] hover:text-[#1E1B18] cursor-pointer"
+              >
+                Retour à la connexion
+              </button>
+              <button
+                type="submit"
+                [disabled]="forgotPasswordForm.invalid || isSubmittingAuth()"
+                class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#C81E32] hover:bg-[#A61728] disabled:opacity-40 rounded-xl transition-colors cursor-pointer"
+              >
+                <mat-icon class="!text-sm !w-4 !h-4">mail</mat-icon>
+                <span>Envoyer le lien</span>
+              </button>
+            </div>
+          </form>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ===================================================================== -->
+  <!-- MODALE DE CONFIRMATION DE SUPPRESSION D'UN ATELIER                    -->
+  <!-- ===================================================================== -->
+  @if (eventToDelete(); as targetEvt) {
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="deleteModalTitle"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4"
+    >
+      <div class="bg-white border border-[#E6DEC8] rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
+        <div class="flex items-start gap-3">
+          <div class="p-2.5 rounded-xl bg-[#FEF2F2] text-[#991B1B] shrink-0">
+            <mat-icon class="!text-xl !w-6 !h-6">warning</mat-icon>
+          </div>
+          <div>
+            <h3 id="deleteModalTitle" class="font-display text-xl font-bold text-[#1E1B18]">
+              Supprimer cet atelier ?
+            </h3>
+            <p class="text-xs text-[#5C5346] mt-0.5">
+              Action réservée à l'organisateur (irréversible)
+            </p>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-[#F7F2E7] border border-[#E6DEC8] text-xs text-[#5C5346] space-y-2 leading-relaxed">
+          <p>
+            Vous êtes sur le point de supprimer définitivement l'atelier
+            <strong class="text-[#1E1B18]">« {{ targetEvt.title }} »</strong> (code <span class="font-mono-tabular font-semibold">{{ targetEvt.inviteCode }}</span>).
+          </p>
+          <p class="text-[#991B1B] font-medium">
+            Attention : tous les participants, leurs attributions secrètes, les listes de souhaits et les messages anonymes associés seront supprimés.
+          </p>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-[#E6DEC8]">
+          <button
+            type="button"
+            (click)="cancelDeleteEvent()"
+            [disabled]="isDeletingEvent()"
+            class="px-4 py-2 text-xs font-semibold text-[#5C5346] hover:text-[#1E1B18] rounded-xl whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            (click)="executeDeleteEvent(targetEvt.id)"
+            [disabled]="isDeletingEvent()"
+            class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#C81E32] hover:bg-[#A61728] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer disabled:opacity-50"
+          >
+            @if (isDeletingEvent()) {
+              <mat-icon class="!text-sm !w-4 !h-4 animate-spin">refresh</mat-icon>
+              <span>Suppression en cours...</span>
+            } @else {
+              <mat-icon class="!text-sm !w-4 !h-4">delete_forever</mat-icon>
+              <span>Confirmer la suppression</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Pied de page sobre sans télémétrie artificielle -->
+  <footer class="border-t border-[#E6DEC8] bg-[#F7F2E7]/60 mt-12">
+    <div class="max-w-[1280px] mx-auto px-6 py-5 flex flex-wrap items-center justify-between gap-4 text-xs text-[#5C5346]">
+      <span>L'Atelier du Père Noël Secret · Organisation et suivi confidentiel de vos tirages de fin d'année</span>
+      <div class="flex items-center gap-4">
+        <button
+          type="button"
+          (click)="setSection('workshop')"
+          class="hover:text-[#1E1B18] underline-offset-4 hover:underline cursor-pointer"
+        >
+          Règles d'exclusion
+        </button>
+        <button
+          type="button"
+          (click)="setSection('reveal')"
+          class="hover:text-[#1E1B18] underline-offset-4 hover:underline cursor-pointer"
+        >
+          Codes PIN
+        </button>
+        <button
+          type="button"
+          (click)="setSection('wishes')"
+          class="hover:text-[#1E1B18] underline-offset-4 hover:underline cursor-pointer"
+        >
+          Listes de souhaits
+        </button>
+      </div>
+    </div>
+  </footer>
+</div>

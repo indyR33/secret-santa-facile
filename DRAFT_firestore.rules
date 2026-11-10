@@ -1,0 +1,312 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================================
+    // 0. FILET DE SÉCURITÉ GLOBAL (Default-Deny Catch-All)
+    // =========================================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // =========================================================================
+    // 1. PRIMITIVES GLOBALES DURCIES
+    // =========================================================================
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'password');
+    }
+
+    function isEventOwner(eventId) {
+      return exists(/databases/$(database)/documents/events/$(eventId)) &&
+        get(/databases/$(database)/documents/events/$(eventId)).data.ownerId == request.auth.uid;
+    }
+
+    // =========================================================================
+    // 2. BLUEPRINTS DE VALIDATION (Anti-Update-Gap)
+    // =========================================================================
+    function isValidSecretSantaEvent(data) {
+      return data.keys().hasAll([
+          'title', 'subtitle', 'eventDate', 'location', 'budget',
+          'inviteCode', 'status', 'ownerId', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'title', 'subtitle', 'eventDate', 'location', 'budget',
+          'inviteCode', 'status', 'ownerId', 'createdAt', 'updatedAt'
+        ]) &&
+        data.title is string && data.title.size() >= 2 && data.title.size() <= 100 &&
+        data.subtitle is string && data.subtitle.size() >= 0 && data.subtitle.size() <= 240 &&
+        data.eventDate is string && data.eventDate.size() >= 8 && data.eventDate.size() <= 30 &&
+        data.location is string && data.location.size() >= 1 && data.location.size() <= 120 &&
+        data.budget is number && data.budget >= 1 && data.budget <= 10000 &&
+        data.inviteCode is string && data.inviteCode.size() >= 4 && data.inviteCode.size() <= 16 &&
+        data.inviteCode.matches('^[A-Z0-9\\-]+$') &&
+        data.status is string && (data.status == 'draft' || data.status == 'drawn' || data.status == 'completed') &&
+        data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+        data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.ownerId == request.auth.uid &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp && data.updatedAt == request.time;
+    }
+
+    function isValidParticipant(data, eventId) {
+      return data.keys().hasAll([
+          'eventId', 'ownerId', 'name', 'roleNote', 'avatarColor',
+          'pinCode', 'giftStatus', 'hasRevealed', 'assignedToId',
+          'excludedIds', 'forcedReceiverId', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'eventId', 'ownerId', 'name', 'roleNote', 'avatarColor',
+          'pinCode', 'giftStatus', 'hasRevealed', 'assignedToId',
+          'excludedIds', 'forcedReceiverId', 'createdAt', 'updatedAt'
+        ]) &&
+        data.eventId is string && data.eventId.size() >= 1 && data.eventId.size() <= 128 &&
+        data.eventId.matches('^[a-zA-Z0-9_\\-]+$') && data.eventId == eventId &&
+        data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+        data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') && data.ownerId == request.auth.uid &&
+        data.name is string && data.name.size() >= 1 && data.name.size() <= 60 &&
+        data.roleNote is string && data.roleNote.size() >= 0 && data.roleNote.size() <= 100 &&
+        data.avatarColor is string && data.avatarColor.size() >= 4 && data.avatarColor.size() <= 32 &&
+        data.pinCode is string && data.pinCode.size() == 4 && data.pinCode.matches('^[0-9]{4}$') &&
+        data.giftStatus is string && (
+          data.giftStatus == 'idea' || data.giftStatus == 'bought' ||
+          data.giftStatus == 'wrapped' || data.giftStatus == 'ready'
+        ) &&
+        data.hasRevealed is bool &&
+        data.assignedToId is string && data.assignedToId.size() >= 0 && data.assignedToId.size() <= 128 &&
+        data.assignedToId.matches('^[a-zA-Z0-9_\\-]*$') &&
+        data.excludedIds is list && data.excludedIds.size() <= 10 &&
+        (data.excludedIds.size() == 0 || (data.excludedIds[0] is string && data.excludedIds[0].size() <= 128)) &&
+        data.forcedReceiverId is string && data.forcedReceiverId.size() >= 0 && data.forcedReceiverId.size() <= 128 &&
+        data.forcedReceiverId.matches('^[a-zA-Z0-9_\\-]*$') &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp && data.updatedAt == request.time;
+    }
+
+    function isValidWishItem(data, eventId) {
+      return data.keys().hasAll([
+          'eventId', 'participantId', 'ownerId', 'title', 'details',
+          'linkUrl', 'estimatedPrice', 'priority', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'eventId', 'participantId', 'ownerId', 'title', 'details',
+          'linkUrl', 'estimatedPrice', 'priority', 'createdAt', 'updatedAt'
+        ]) &&
+        data.eventId is string && data.eventId.size() >= 1 && data.eventId.size() <= 128 &&
+        data.eventId.matches('^[a-zA-Z0-9_\\-]+$') && data.eventId == eventId &&
+        data.participantId is string && data.participantId.size() >= 1 && data.participantId.size() <= 128 &&
+        data.participantId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+        data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') && data.ownerId == request.auth.uid &&
+        data.title is string && data.title.size() >= 1 && data.title.size() <= 120 &&
+        data.details is string && data.details.size() >= 0 && data.details.size() <= 300 &&
+        data.linkUrl is string && data.linkUrl.size() >= 0 && data.linkUrl.size() <= 500 &&
+        data.estimatedPrice is number && data.estimatedPrice >= 0 && data.estimatedPrice <= 10000 &&
+        data.priority is string && (
+          data.priority == 'normal' || data.priority == 'high' || data.priority == 'dream'
+        ) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp && data.updatedAt == request.time;
+    }
+
+    function isValidAnonymousMessage(data, eventId) {
+      return data.keys().hasAll([
+          'eventId', 'targetParticipantId', 'senderRole',
+          'ownerId', 'content', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'eventId', 'targetParticipantId', 'senderRole',
+          'ownerId', 'content', 'createdAt', 'updatedAt'
+        ]) &&
+        data.eventId is string && data.eventId.size() >= 1 && data.eventId.size() <= 128 &&
+        data.eventId.matches('^[a-zA-Z0-9_\\-]+$') && data.eventId == eventId &&
+        data.targetParticipantId is string && data.targetParticipantId.size() >= 1 && data.targetParticipantId.size() <= 128 &&
+        data.targetParticipantId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.senderRole is string && (data.senderRole == 'santa' || data.senderRole == 'recipient') &&
+        data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+        data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') && data.ownerId == request.auth.uid &&
+        data.content is string && data.content.size() >= 1 && data.content.size() <= 500 &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp && data.updatedAt == request.time;
+    }
+
+    // =========================================================================
+    // 3. COLLECTION : /events/{eventId}
+    // =========================================================================
+    match /events/{eventId} {
+      allow get: if isVerified() && isValidId(eventId) && existing().ownerId == request.auth.uid;
+      allow list: if isVerified() && existing().ownerId == request.auth.uid;
+
+      allow create: if isVerified() &&
+        isValidId(eventId) &&
+        isValidSecretSantaEvent(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().status == 'draft';
+
+      allow update: if (
+        isVerified() &&
+        isValidId(eventId) &&
+        isValidSecretSantaEvent(incoming()) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        existing().status != 'completed' && (
+          // Action 1 : Mise à jour des détails de l'événement
+          incoming().diff(existing()).affectedKeys().hasOnly(['title', 'subtitle', 'eventDate', 'location', 'budget', 'updatedAt']) ||
+          // Action 2 : Changement d'état du tirage (draft -> drawn -> completed)
+          incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt'])
+        )
+      );
+
+      allow delete: if isVerified() && isValidId(eventId) && existing().ownerId == request.auth.uid;
+
+      // =======================================================================
+      // 4. SOUS-COLLECTION : /events/{eventId}/participants/{participantId}
+      // =======================================================================
+      match /participants/{participantId} {
+        allow get: if isVerified() &&
+          isValidId(eventId) &&
+          isValidId(participantId) &&
+          existing().ownerId == request.auth.uid &&
+          isEventOwner(eventId);
+
+        allow list: if isVerified() && existing().ownerId == request.auth.uid;
+
+        allow create: if isVerified() &&
+          isValidId(eventId) &&
+          isValidId(participantId) &&
+          isValidParticipant(incoming(), eventId) &&
+          incoming().createdAt == request.time &&
+          isEventOwner(eventId);
+
+        allow update: if (
+          isVerified() &&
+          isValidId(eventId) &&
+          isValidId(participantId) &&
+          isValidParticipant(incoming(), eventId) &&
+          existing().ownerId == request.auth.uid &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().eventId == existing().eventId &&
+          incoming().createdAt == existing().createdAt &&
+          isEventOwner(eventId) && (
+            // Action 1 : Mise à jour des règles d'exclusion, de tirage forcé ou du profil
+            incoming().diff(existing()).affectedKeys().hasOnly(['name', 'roleNote', 'avatarColor', 'pinCode', 'excludedIds', 'forcedReceiverId', 'updatedAt']) ||
+            // Action 2 : Attribution lors du tirage au sort
+            incoming().diff(existing()).affectedKeys().hasOnly(['assignedToId', 'hasRevealed', 'giftStatus', 'updatedAt']) ||
+            // Action 3 : Révélation de la mission ou avancement du cadeau
+            incoming().diff(existing()).affectedKeys().hasOnly(['hasRevealed', 'giftStatus', 'pinCode', 'updatedAt'])
+          )
+        );
+
+        allow delete: if isVerified() &&
+          isValidId(eventId) &&
+          isValidId(participantId) &&
+          existing().ownerId == request.auth.uid &&
+          isEventOwner(eventId);
+      }
+
+      // =======================================================================
+      // 5. SOUS-COLLECTION : /events/{eventId}/wishes/{wishId}
+      // =======================================================================
+      match /wishes/{wishId} {
+        allow get: if isVerified() &&
+          isValidId(eventId) &&
+          isValidId(wishId) &&
+          existing().ownerId == request.auth.uid &&
+          isEventOwner(eventId);
+
+        allow list: if isVerified() && existing().ownerId == request.auth.uid;
+
+        allow create: if isVerified() &&
+          isValidId(eventId) &&
+          isValidId(wishId) &&
+          isValidWishItem(incoming(), eventId) &&
+          incoming().createdAt == request.time &&
+          isEventOwner(eventId) &&
+          exists(/databases/$(database)/documents/events/$(eventId)/participants/$(incoming().participantId));
+
+        allow update: if (
+          isVerified() &&
+          isValidId(eventId) &&
+          isValidId(wishId) &&
+          isValidWishItem(incoming(), eventId) &&
+          existing().ownerId == request.auth.uid &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().eventId == existing().eventId &&
+          incoming().participantId == existing().participantId &&
+          incoming().createdAt == existing().createdAt &&
+          isEventOwner(eventId) && (
+            // Action 1 : Modification des détails d'un souhait
+            incoming().diff(existing()).affectedKeys().hasOnly(['title', 'details', 'linkUrl', 'estimatedPrice', 'priority', 'updatedAt'])
+          )
+        );
+
+        allow delete: if isVerified() &&
+          isValidId(eventId) &&
+          isValidId(wishId) &&
+          existing().ownerId == request.auth.uid &&
+          isEventOwner(eventId);
+      }
+
+      // =======================================================================
+      // 6. SOUS-COLLECTION : /events/{eventId}/messages/{messageId}
+      // =======================================================================
+      match /messages/{messageId} {
+        allow get: if isVerified() &&
+          isValidId(eventId) &&
+          isValidId(messageId) &&
+          existing().ownerId == request.auth.uid &&
+          isEventOwner(eventId);
+
+        allow list: if isVerified() && existing().ownerId == request.auth.uid;
+
+        allow create: if isVerified() &&
+          isValidId(eventId) &&
+          isValidId(messageId) &&
+          isValidAnonymousMessage(incoming(), eventId) &&
+          incoming().createdAt == request.time &&
+          isEventOwner(eventId) &&
+          exists(/databases/$(database)/documents/events/$(eventId)/participants/$(incoming().targetParticipantId));
+
+        allow update: if (
+          isVerified() &&
+          isValidId(eventId) &&
+          isValidId(messageId) &&
+          isValidAnonymousMessage(incoming(), eventId) &&
+          existing().ownerId == request.auth.uid &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().eventId == existing().eventId &&
+          incoming().targetParticipantId == existing().targetParticipantId &&
+          incoming().senderRole == existing().senderRole &&
+          incoming().createdAt == existing().createdAt &&
+          isEventOwner(eventId) && (
+            // Action 1 : Correction du contenu d'un message
+            incoming().diff(existing()).affectedKeys().hasOnly(['content', 'updatedAt'])
+          )
+        );
+
+        allow delete: if isVerified() &&
+          isValidId(eventId) &&
+          isValidId(messageId) &&
+          existing().ownerId == request.auth.uid &&
+          isEventOwner(eventId);
+      }
+    }
+  }
+}

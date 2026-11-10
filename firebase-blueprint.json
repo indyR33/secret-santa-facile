@@ -1,0 +1,339 @@
+{
+  "entities": {
+    "SecretSantaEvent": {
+      "title": "SecretSantaEvent",
+      "description": "Un événement Secret Santa organisé pour un groupe de participants.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Nom de l'événement Secret Santa.",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "subtitle": {
+          "type": "string",
+          "description": "Message d'accueil ou thème de la fête.",
+          "minLength": 0,
+          "maxLength": 240
+        },
+        "eventDate": {
+          "type": "string",
+          "description": "Date prévue pour l'échange des cadeaux (format ISO YYYY-MM-DD).",
+          "minLength": 8,
+          "maxLength": 30
+        },
+        "location": {
+          "type": "string",
+          "description": "Lieu de la remise des cadeaux.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "budget": {
+          "type": "number",
+          "description": "Budget maximum conseillé en euros."
+        },
+        "inviteCode": {
+          "type": "string",
+          "description": "Code court d'invitation à l'événement.",
+          "minLength": 4,
+          "maxLength": 16,
+          "pattern": "^[A-Z0-9\\-]+$"
+        },
+        "status": {
+          "type": "string",
+          "description": "Statut de l'événement.",
+          "enum": ["draft", "drawn", "completed"]
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "UID Firebase Auth du créateur de l'événement.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Horodatage de création serveur."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Horodatage de dernière modification serveur."
+        }
+      },
+      "required": [
+        "title",
+        "subtitle",
+        "eventDate",
+        "location",
+        "budget",
+        "inviteCode",
+        "status",
+        "ownerId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Participant": {
+      "title": "Participant",
+      "description": "Un participant inscrit à un événement Secret Santa avec ses règles d'exclusion et son état de cadeau.",
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "description": "Identifiant de l'événement parent.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "UID de l'organisateur propriétaire de l'événement.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Prénom ou surnom du participant.",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "roleNote": {
+          "type": "string",
+          "description": "Indice ou note sur le participant (ex: Amateur de chocolat).",
+          "minLength": 0,
+          "maxLength": 100
+        },
+        "avatarColor": {
+          "type": "string",
+          "description": "Couleur d'avatar attribuée.",
+          "minLength": 4,
+          "maxLength": 32
+        },
+        "pinCode": {
+          "type": "string",
+          "description": "Code PIN à 4 chiffres protégeant la révélation du tirage.",
+          "minLength": 4,
+          "maxLength": 4,
+          "pattern": "^[0-9]{4}$"
+        },
+        "giftStatus": {
+          "type": "string",
+          "description": "Avancement du cadeau préparé par ce participant.",
+          "enum": ["idea", "bought", "wrapped", "ready"]
+        },
+        "hasRevealed": {
+          "type": "boolean",
+          "description": "Indique si le participant a déjà découvert sa cible."
+        },
+        "assignedToId": {
+          "type": "string",
+          "description": "Identifiant du destinataire attribué lors du tirage (vide avant tirage).",
+          "minLength": 0,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]*$"
+        },
+        "excludedIds": {
+          "type": "array",
+          "description": "Liste bornée (max 10) des identifiants de participants exclus pour ce participant."
+        },
+        "forcedReceiverId": {
+          "type": "string",
+          "description": "Identifiant facultatif d'un destinataire imposé par l'organisateur (tirage forcé).",
+          "minLength": 0,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]*$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Horodatage de création serveur."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Horodatage de mise à jour serveur."
+        }
+      },
+      "required": [
+        "eventId",
+        "ownerId",
+        "name",
+        "roleNote",
+        "avatarColor",
+        "pinCode",
+        "giftStatus",
+        "hasRevealed",
+        "assignedToId",
+        "excludedIds",
+        "forcedReceiverId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "WishItem": {
+      "title": "WishItem",
+      "description": "Une idée cadeau ajoutée à la liste de souhaits d'un participant.",
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "description": "Identifiant de l'événement parent.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "participantId": {
+          "type": "string",
+          "description": "Identifiant du participant qui souhaite ce cadeau.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "UID de l'organisateur propriétaire de l'événement.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "title": {
+          "type": "string",
+          "description": "Titre de l'idée cadeau.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "details": {
+          "type": "string",
+          "description": "Précisions (taille, couleur, édition).",
+          "minLength": 0,
+          "maxLength": 300
+        },
+        "linkUrl": {
+          "type": "string",
+          "description": "Lien marchand optionnel.",
+          "minLength": 0,
+          "maxLength": 500
+        },
+        "estimatedPrice": {
+          "type": "number",
+          "description": "Prix estimé en euros."
+        },
+        "priority": {
+          "type": "string",
+          "description": "Niveau d'envie du cadeau.",
+          "enum": ["normal", "high", "dream"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Horodatage de création serveur."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Horodatage de mise à jour serveur."
+        }
+      },
+      "required": [
+        "eventId",
+        "participantId",
+        "ownerId",
+        "title",
+        "details",
+        "linkUrl",
+        "estimatedPrice",
+        "priority",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AnonymousMessage": {
+      "title": "AnonymousMessage",
+      "description": "Message anonyme échangé entre un Père Noël Secret et son destinataire.",
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "description": "Identifiant de l'événement parent.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "targetParticipantId": {
+          "type": "string",
+          "description": "Identifiant du participant destinataire du cadeau (canal de discussion).",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "senderRole": {
+          "type": "string",
+          "description": "Rôle anonyme de l'expéditeur du message.",
+          "enum": ["santa", "recipient"]
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "UID de l'organisateur propriétaire de l'événement.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "content": {
+          "type": "string",
+          "description": "Contenu du message anonyme.",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Horodatage de création serveur."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Horodatage de mise à jour serveur."
+        }
+      },
+      "required": [
+        "eventId",
+        "targetParticipantId",
+        "senderRole",
+        "ownerId",
+        "content",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/events/{eventId}": {
+      "schema": {
+        "$ref": "#/entities/SecretSantaEvent"
+      },
+      "description": "Collection principale des événements Secret Santa."
+    },
+    "/events/{eventId}/participants/{participantId}": {
+      "schema": {
+        "$ref": "#/entities/Participant"
+      },
+      "description": "Sous-collection des participants d'un événement Secret Santa."
+    },
+    "/events/{eventId}/wishes/{wishId}": {
+      "schema": {
+        "$ref": "#/entities/WishItem"
+      },
+      "description": "Sous-collection des listes de souhaits des participants."
+    },
+    "/events/{eventId}/messages/{messageId}": {
+      "schema": {
+        "$ref": "#/entities/AnonymousMessage"
+      },
+      "description": "Sous-collection des messages anonymes entre Père Noël Secret et destinataire."
+    }
+  }
+}
