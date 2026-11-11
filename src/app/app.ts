@@ -268,6 +268,12 @@ export class App implements OnInit {
     });
   });
 
+  readonly selectedFilteredParticipant = computed<Participant | null>(() => {
+    const filterId = this.selectedWishParticipantId();
+    if (filterId === 'ALL') return null;
+    return this.store.participants().find((p) => p.id === filterId) ?? null;
+  });
+
   readonly activeThreadMessages = computed<AnonymousMessage[]>(() => {
     const me = this.unlockedParticipant();
     if (!me) return [];
@@ -657,6 +663,12 @@ export class App implements OnInit {
   getParticipantName(participantId: string): string {
     return (
       this.store.participants().find((p) => p.id === participantId)?.name ?? 'Participant mystère'
+    );
+  }
+
+  getParticipantRoleNote(participantId: string): string {
+    return (
+      this.store.participants().find((p) => p.id === participantId)?.roleNote?.trim() ?? ''
     );
   }
 

@@ -161,8 +161,8 @@ Si une fête est terminée ou annulée et que vous souhaitez faire du ménage :
    - Les blocs d'administration réservés à l'organisateur (bannière hero, barre d'outils, boutons d'administration de chaque participant, panneau des règles d'exclusion et tirage forcé) sont automatiquement masqués.
    - Les indicateurs chiffrés du bandeau supérieur sont allégés : seuls les chiffres clés (participants inscrits, budget, avancement %, courriers) sont affichés sans les sous-textes détaillés superflus.
    - La galerie publique des enveloppes de tous les participants est retirée : le participant accède directement à sa propre enveloppe via un déverrouillage sécurisé, puis consulte exclusivement son panneau de mission personnel sans être exposé aux enveloppes des autres participants.
-   - La liste des lutins s'affiche en pleine largeur avec un design calme, sobre et sans boutons d'action d'organisateur.
-4. Si le lien était personnalisé à votre prénom, la fenêtre de saisie de votre code PIN s'ouvre directement. Sinon, rendez-vous dans la section **« Cartes & Codes PIN »**, cliquez sur **« Déverrouiller mon Enveloppe »**, choisissez votre prénom et saisissez votre code PIN.
+   - Dans l'onglet **« Atelier »**, le tableau des participants ne montre pas les indices : seul le statut du cadeau est affiché sous la forme **« Son cadeau: [Statut] »**. Les indices sont regroupés dans l'onglet **« Idées »** au niveau du **« Registre des souhaits »**.
+4. Si le lien était personnalisé à votre prénom, la fenêtre de saisie de votre code PIN s'ouvre directement. Sinon, rendez-vous dans la section **« Mission et PIN »**, cliquez sur **« Déverrouiller mon Enveloppe »**, choisissez votre prénom et saisissez votre code PIN.
 5. Saisissez votre **code PIN à 4 chiffres** (par défaut `1234` lors de la création, ou le code convenu avec votre organisateur).
 6. Cliquez sur **« Briser le sceau et révéler »**.
 

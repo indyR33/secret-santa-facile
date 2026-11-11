@@ -529,14 +529,20 @@
                           <p class="text-sm font-semibold text-[#1E1B18] truncate">
                             {{ row.recipient.name }}
                           </p>
-                          <p class="text-xs text-[#5C5346] truncate">
-                            {{ row.recipient.roleNote || 'Prêt pour le tirage Secret Santa' }}
-                            <span aria-hidden="true">·</span>
-                            <span>
-                              Cadeau qui lui est destiné :
-                              <strong class="text-[#1E1B18]">{{ getGiftStatusLabel(row.giftStatus) }}</strong>
-                            </span>
-                          </p>
+                          @if (store.isGuestMode()) {
+                            <p class="text-xs text-[#5C5346] truncate">
+                              Son cadeau: <strong class="text-[#1E1B18]">{{ getGiftStatusLabel(row.giftStatus) }}</strong>
+                            </p>
+                          } @else {
+                            <p class="text-xs text-[#5C5346] truncate">
+                              {{ row.recipient.roleNote || 'Prêt pour le tirage Secret Santa' }}
+                              <span aria-hidden="true">·</span>
+                              <span>
+                                Cadeau qui lui est destiné :
+                                <strong class="text-[#1E1B18]">{{ getGiftStatusLabel(row.giftStatus) }}</strong>
+                              </span>
+                            </p>
+                          }
                         </div>
                       </div>
 
@@ -830,7 +836,7 @@
           <div class="flex flex-wrap items-end justify-between gap-4 border-b border-[#E6DEC8] pb-4">
             <div>
               <h2 class="font-display text-2xl sm:text-3xl font-bold text-[#1E1B18]">
-                Enveloppes Secrètes &amp; Codes PIN Individuels
+                Enveloppe Secrète &amp; Code PIN Individuel
               </h2>
               <p class="text-sm text-[#5C5346] mt-1">
                 Cliquez sur votre enveloppe personnelle et saisissez votre code PIN à 4 chiffres pour découvrir votre destinataire sans que personne d'autre ne le voie.
@@ -1274,10 +1280,10 @@
             <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[#E6DEC8] pb-4">
               <div>
                 <h2 class="font-display text-2xl font-bold text-[#1E1B18]">
-                  Registre des Listes de Souhaits
+                  Registre des souhaits
                 </h2>
                 <p class="text-sm text-[#5C5346] mt-0.5">
-                  Filtrez par participant pour puiser de l'inspiration ou vérifier le respect du budget.
+                  Filtrez par participant pour puiser de l'inspiration, consulter leurs indices ou vérifier le respect du budget.
                 </p>
               </div>
 
@@ -1336,6 +1342,18 @@
               }
             </div>
 
+            <!-- Indice du participant filtré (si un participant est sélectionné) -->
+            @if (selectedFilteredParticipant(); as selP) {
+              @if (selP.roleNote) {
+                <div class="p-3.5 bg-[#FEF9C3]/80 border border-[#FEF08A] rounded-xl flex items-center gap-2.5 text-xs text-[#854D0E]">
+                  <mat-icon class="!text-base !w-4 !h-4 text-[#D97706] shrink-0">tips_and_updates</mat-icon>
+                  <span>
+                    <strong>Indice / Goûts de {{ selP.name }} :</strong> {{ selP.roleNote }}
+                  </span>
+                </div>
+              }
+            }
+
             <!-- Liste des souhaits -->
             @if (filteredWishes().length === 0) {
               <div class="text-center py-10 space-y-2 text-sm text-[#5C5346]">
@@ -1347,9 +1365,16 @@
                 @for (wish of filteredWishes(); track wish.id) {
                   <div class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div class="space-y-1">
-                      <!-- Métadonnées épurées avec séparateurs typographiques -->
+                      <!-- Métadonnées épurées avec séparateurs typographiques et indice participant -->
                       <div class="flex flex-wrap items-center gap-2 text-xs text-[#5C5346]">
                         <span class="font-semibold text-[#1E1B18]">{{ getParticipantName(wish.participantId) }}</span>
+                        @if (getParticipantRoleNote(wish.participantId); as note) {
+                          <span aria-hidden="true">·</span>
+                          <span class="inline-flex items-center gap-1 font-medium text-[#854D0E] bg-[#FEF9C3] px-2 py-0.5 rounded-md border border-[#FEF08A]">
+                            <mat-icon class="!text-xs !w-3.5 !h-3.5 text-[#D97706]">tips_and_updates</mat-icon>
+                            <span>Indice : {{ note }}</span>
+                          </span>
+                        }
                         <span aria-hidden="true">·</span>
                         <span>{{ getPriorityLabel(wish.priority) }}</span>
                         <span aria-hidden="true">·</span>
