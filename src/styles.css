@@ -31,6 +31,23 @@
   }
 }
 
+@keyframes color-flash {
+  0%, 100% {
+    background-color: #ffffff;
+    border-color: #e6dec8;
+    color: #1e1b18;
+  }
+  50% {
+    background-color: #c81e32;
+    border-color: #c81e32;
+    color: #ffffff;
+  }
+}
+
+.animate-color-flash {
+  animation: color-flash 2s infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;

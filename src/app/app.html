@@ -285,7 +285,7 @@
               <button
                 type="button"
                 (click)="openAuthModal('signin')"
-                [class.animate-pulse]="!store.currentUser()"
+                [class.animate-color-flash]="!store.currentUser()"
                 class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-white border border-[#E6DEC8] hover:bg-[#F7F2E7] text-[#1E1B18] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
               >
                 <mat-icon class="!text-base !w-4 !h-4 text-[#C81E32]">account_circle</mat-icon>
