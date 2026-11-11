@@ -35,7 +35,7 @@
           [class.font-semibold]="activeSection() === 'reveal'"
           [class.border-transparent]="activeSection() !== 'reveal'"
         >
-          Cartes &amp; Codes PIN
+          Mission et PIN
         </button>
         <button
           type="button"
@@ -121,7 +121,7 @@
         [class.text-[#C81E32]]="activeSection() === 'reveal'"
         [class.font-semibold]="activeSection() === 'reveal'"
       >
-        Codes PIN
+        Mission
       </button>
       <button
         type="button"
@@ -131,7 +131,7 @@
         [class.text-[#C81E32]]="activeSection() === 'wishes'"
         [class.font-semibold]="activeSection() === 'wishes'"
       >
-        Souhaits
+        Idées
       </button>
       <button
         type="button"
@@ -141,7 +141,7 @@
         [class.text-[#C81E32]]="activeSection() === 'messages'"
         [class.font-semibold]="activeSection() === 'messages'"
       >
-        Poste Anonyme
+        Messagerie
       </button>
     </div>
   </header>
@@ -1508,7 +1508,7 @@
                   >
                     <mat-icon class="!text-base !w-4 !h-4">redeem</mat-icon>
                     <span>
-                      Discussion avec ma Cible ({{ unlockedTargetParticipant()?.name || 'Non tirée' }})
+                      Écrire à ({{ unlockedTargetParticipant()?.name || 'Non tirée' }})
                     </span>
                   </button>
 
@@ -1521,7 +1521,7 @@
                     [class.text-[#1E1B18]]="activeChatChannel() !== 'from_santa'"
                   >
                     <mat-icon class="!text-base !w-4 !h-4">auto_awesome</mat-icon>
-                    <span>Discussion avec mon Père Noël Secret</span>
+                    <span>Écrire à mon Santa</span>
                   </button>
                 </div>
               </div>
