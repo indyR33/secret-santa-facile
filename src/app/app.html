@@ -63,14 +63,41 @@
 
       <!-- Zone 3 : 1 action principale -->
       <div class="flex items-center shrink-0">
-        <button
-          type="button"
-          (click)="openNewEventModal()"
-          class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-[#C81E32] rounded-xl hover:bg-[#A61728] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-        >
-          <mat-icon class="!text-base !w-4 !h-4 leading-none">add_circle</mat-icon>
-          <span>Nouvel Événement</span>
-        </button>
+        @if (!store.isGuestMode()) {
+          <button
+            type="button"
+            (click)="openNewEventModal()"
+            class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-[#C81E32] rounded-xl hover:bg-[#A61728] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+          >
+            <mat-icon class="!text-base !w-4 !h-4 leading-none">add_circle</mat-icon>
+            <span>Nouvel Événement</span>
+          </button>
+        } @else {
+          <div class="flex items-center gap-2">
+            @if (unlockedParticipant(); as currentP) {
+              <button
+                type="button"
+                (click)="lockCurrentSession()"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#C81E32] bg-[#FEF2F2] hover:bg-[#FEE2E2] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                title="Verrouiller mon enveloppe secrète"
+              >
+                <mat-icon class="!text-sm !w-4 !h-4">lock</mat-icon>
+                <span>{{ currentP.name }} (Verrouiller)</span>
+              </button>
+            }
+            <button
+              type="button"
+              (click)="store.toggleSound()"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#F7F2E7] hover:bg-[#EDE4D1] text-[#1E1B18] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              title="Activer ou couper les effets sonores"
+            >
+              <mat-icon class="!text-base !w-4 !h-4">
+                {{ store.soundEnabled() ? 'volume_up' : 'volume_off' }}
+              </mat-icon>
+              <span class="hidden sm:inline">{{ store.soundEnabled() ? 'Sons' : 'Muet' }}</span>
+            </button>
+          </div>
+        }
       </div>
     </div>
 
@@ -155,213 +182,202 @@
   <!-- CONTENU PRINCIPAL                                                      -->
   <!-- ===================================================================== -->
   <main class="flex-1 max-w-[1280px] w-full mx-auto px-6 py-8 space-y-10">
-    <!-- Barre d'outils d'événement & Synchronisation Cloud Firestore -->
-    <section class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#E6DEC8]">
-      <div class="flex flex-wrap items-center gap-3">
-        <label for="eventSelector" class="text-xs font-semibold text-[#5C5346]">
-          Événement actif :
-        </label>
-        <select
-          id="eventSelector"
-          (change)="onEventChange($event)"
-          class="px-3.5 py-2 text-sm font-medium bg-white border border-[#E6DEC8] rounded-xl text-[#1E1B18] focus:outline-none focus:ring-2 focus:ring-[#C81E32]"
-        >
-          @for (evt of store.events(); track evt.id) {
-            <option [value]="evt.id" [selected]="evt.id === store.activeEvent()?.id">
-              {{ evt.title }} ({{ evt.inviteCode }})
-            </option>
+    <!-- Barre d'outils d'événement & Synchronisation Cloud Firestore (Visible uniquement pour l'organisateur) -->
+    @if (!store.isGuestMode()) {
+      <section class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#E6DEC8]">
+        <div class="flex flex-wrap items-center gap-3">
+          <label for="eventSelector" class="text-xs font-semibold text-[#5C5346]">
+            Événement actif :
+          </label>
+          <select
+            id="eventSelector"
+            (change)="onEventChange($event)"
+            class="px-3.5 py-2 text-sm font-medium bg-white border border-[#E6DEC8] rounded-xl text-[#1E1B18] focus:outline-none focus:ring-2 focus:ring-[#C81E32]"
+          >
+            @for (evt of store.events(); track evt.id) {
+              <option [value]="evt.id" [selected]="evt.id === store.activeEvent()?.id">
+                {{ evt.title }} ({{ evt.inviteCode }})
+              </option>
+            }
+          </select>
+
+          @if (!store.isGuestMode() && store.activeEvent(); as currentEvt) {
+            <button
+              type="button"
+              (click)="confirmDeleteEvent(currentEvt)"
+              class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#991B1B] bg-[#FEF2F2] hover:bg-[#FEE2E2] border border-[#FECACA] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              title="Supprimer définitivement cet atelier"
+            >
+              <mat-icon class="!text-sm !w-4 !h-4">delete_outline</mat-icon>
+              <span>Supprimer l'atelier</span>
+            </button>
           }
-        </select>
 
-        @if (!store.isGuestMode() && store.activeEvent(); as currentEvt) {
-          <button
-            type="button"
-            (click)="confirmDeleteEvent(currentEvt)"
-            class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#991B1B] bg-[#FEF2F2] hover:bg-[#FEE2E2] border border-[#FECACA] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-            title="Supprimer définitivement cet atelier"
-          >
-            <mat-icon class="!text-sm !w-4 !h-4">delete_outline</mat-icon>
-            <span>Supprimer l'atelier</span>
-          </button>
-        }
-
-        @if (store.activeEvent()) {
-          <button
-            type="button"
-            (click)="copyEventLink()"
-            class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#0F766E] bg-[#F0FDFA] hover:bg-[#CCFBF1] border border-[#99F6E4] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-            title="Copier le lien d'accès à cet atelier pour les participants"
-          >
-            <mat-icon class="!text-sm !w-4 !h-4">share</mat-icon>
-            <span>Partager l'atelier</span>
-          </button>
-        }
-
-        @if (unlockedParticipant(); as currentP) {
-          <div class="flex items-center gap-2 text-xs text-[#166534] pl-2">
-            <mat-icon class="!text-base !w-4 !h-4">verified_user</mat-icon>
-            <span>Session active : <strong>{{ currentP.name }}</strong></span>
+          @if (store.activeEvent()) {
             <button
               type="button"
-              (click)="lockCurrentSession()"
-              class="inline-flex items-center gap-1 text-[#C81E32] hover:underline font-medium whitespace-nowrap shrink-0 cursor-pointer ml-1"
+              (click)="copyEventLink()"
+              class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#0F766E] bg-[#F0FDFA] hover:bg-[#CCFBF1] border border-[#99F6E4] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              title="Copier le lien d'accès à cet atelier pour les participants"
             >
-              <mat-icon class="!text-sm !w-3.5 !h-3.5">lock</mat-icon>
-              <span>Verrouiller</span>
+              <mat-icon class="!text-sm !w-4 !h-4">share</mat-icon>
+              <span>Partager l'atelier</span>
             </button>
-          </div>
-        }
-      </div>
+          }
 
-      <!-- Contrôles Cloud Firestore & Effets Sonores -->
-      <div class="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          (click)="store.toggleSound()"
-          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#F7F2E7] hover:bg-[#EDE4D1] text-[#1E1B18] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-        >
-          <mat-icon class="!text-base !w-4 !h-4">
-            {{ store.soundEnabled() ? 'volume_up' : 'volume_off' }}
-          </mat-icon>
-          <span>{{ store.soundEnabled() ? 'Sons activés' : 'Sons coupés' }}</span>
-        </button>
-
-        @if (store.isGuestMode()) {
-          <div class="flex flex-wrap items-center gap-2 text-xs text-[#5C5346]">
-            <span class="inline-flex items-center gap-1.5 text-[#0F766E] font-medium bg-[#F0FDFA] px-2.5 py-1 rounded-lg border border-[#99F6E4]">
-              <mat-icon class="!text-sm !w-4 !h-4">link</mat-icon>
-              <span>Accès Invité (Lien Secret)</span>
-            </span>
-            <button
-              type="button"
-              (click)="openAuthModal('signin')"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white border border-[#E6DEC8] hover:bg-[#F7F2E7] text-[#1E1B18] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-            >
-              <mat-icon class="!text-base !w-4 !h-4 text-[#C81E32]">account_circle</mat-icon>
-              <span>Connexion Organisateur</span>
-            </button>
-          </div>
-        } @else if (store.currentUser()) {
-          <div class="flex flex-wrap items-center gap-2 text-xs text-[#5C5346]">
-            <span class="inline-flex items-center gap-1.5 text-[#166534] font-medium bg-[#F0FDF4] px-2.5 py-1 rounded-lg border border-[#BBF7D0]">
-              <mat-icon class="!text-sm !w-4 !h-4">verified</mat-icon>
-              <span>Organisateur : <strong>{{ store.currentUser()?.displayName || store.currentUser()?.email }}</strong></span>
-            </span>
-            @if (store.events().length === 0) {
+          @if (unlockedParticipant(); as currentP) {
+            <div class="flex items-center gap-2 text-xs text-[#166534] pl-2">
+              <mat-icon class="!text-base !w-4 !h-4">verified_user</mat-icon>
+              <span>Session active : <strong>{{ currentP.name }}</strong></span>
               <button
                 type="button"
-                (click)="store.seedDemoEventToCloud()"
-                class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold bg-[#166534] text-white rounded-xl hover:bg-[#14532D] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                (click)="lockCurrentSession()"
+                class="inline-flex items-center gap-1 text-[#C81E32] hover:underline font-medium whitespace-nowrap shrink-0 cursor-pointer ml-1"
               >
-                <mat-icon class="!text-sm !w-4 !h-4">cloud_upload</mat-icon>
-                <span>Importer l'Atelier d'Exemple</span>
+                <mat-icon class="!text-sm !w-3.5 !h-3.5">lock</mat-icon>
+                <span>Verrouiller</span>
               </button>
-            }
-            <button
-              type="button"
-              (click)="store.logout()"
-              class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-white border border-[#E6DEC8] rounded-xl hover:bg-[#F7F2E7] text-[#1E1B18] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-            >
-              <mat-icon class="!text-sm !w-4 !h-4">logout</mat-icon>
-              <span>Déconnexion</span>
-            </button>
-          </div>
-        } @else {
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="text-xs text-[#5C5346]">Mode Atelier Démo</span>
-            <button
-              type="button"
-              (click)="openAuthModal('signin')"
-              class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-white border border-[#E6DEC8] hover:bg-[#F7F2E7] text-[#1E1B18] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-            >
-              <mat-icon class="!text-base !w-4 !h-4 text-[#C81E32]">account_circle</mat-icon>
-              <span>Connexion Organisateur (Google SSO ou Email)</span>
-            </button>
-          </div>
-        }
-      </div>
-    </section>
+            </div>
+          }
+        </div>
+
+        <!-- Contrôles Cloud Firestore & Effets Sonores -->
+        <div class="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            (click)="store.toggleSound()"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#F7F2E7] hover:bg-[#EDE4D1] text-[#1E1B18] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+          >
+            <mat-icon class="!text-base !w-4 !h-4">
+              {{ store.soundEnabled() ? 'volume_up' : 'volume_off' }}
+            </mat-icon>
+            <span>{{ store.soundEnabled() ? 'Sons activés' : 'Sons coupés' }}</span>
+          </button>
+
+          @if (store.currentUser()) {
+            <div class="flex flex-wrap items-center gap-2 text-xs text-[#5C5346]">
+              <span class="inline-flex items-center gap-1.5 text-[#166534] font-medium bg-[#F0FDF4] px-2.5 py-1 rounded-lg border border-[#BBF7D0]">
+                <mat-icon class="!text-sm !w-4 !h-4">verified</mat-icon>
+                <span>Organisateur : <strong>{{ store.currentUser()?.displayName || store.currentUser()?.email }}</strong></span>
+              </span>
+              @if (store.events().length === 0) {
+                <button
+                  type="button"
+                  (click)="store.seedDemoEventToCloud()"
+                  class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold bg-[#166534] text-white rounded-xl hover:bg-[#14532D] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <mat-icon class="!text-sm !w-4 !h-4">cloud_upload</mat-icon>
+                  <span>Importer l'Atelier d'Exemple</span>
+                </button>
+              }
+              <button
+                type="button"
+                (click)="store.logout()"
+                class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-white border border-[#E6DEC8] rounded-xl hover:bg-[#F7F2E7] text-[#1E1B18] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                <mat-icon class="!text-sm !w-4 !h-4">logout</mat-icon>
+                <span>Déconnexion</span>
+              </button>
+            </div>
+          } @else {
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-xs text-[#5C5346]">Mode Atelier Démo</span>
+              <button
+                type="button"
+                (click)="openAuthModal('signin')"
+                class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-white border border-[#E6DEC8] hover:bg-[#F7F2E7] text-[#1E1B18] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                <mat-icon class="!text-base !w-4 !h-4 text-[#C81E32]">account_circle</mat-icon>
+                <span>Connexion Organisateur (Google SSO ou Email)</span>
+              </button>
+            </div>
+          }
+        </div>
+      </section>
+    }
 
     @if (store.activeEvent(); as evt) {
       <!-- =================================================================== -->
-      <!-- BANNIÈRE HERO DE L'ÉVÉNEMENT (Grille 2 colonnes équilibrée)         -->
+      <!-- BANNIÈRE HERO DE L'ÉVÉNEMENT (Organisateur uniquement)              -->
       <!-- =================================================================== -->
-      <section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-        <!-- Colonne gauche : Détails de la fête et actions clés -->
-        <div class="lg:col-span-7 bg-white border border-[#E6DEC8] rounded-2xl p-6 sm:p-8 flex flex-col justify-between space-y-6">
-          <div class="space-y-4">
-            <!-- Métadonnées épurées sans pilules (Zero-Pill Discipline) -->
-            <div class="flex flex-wrap items-center gap-2 text-xs font-medium text-[#5C5346]">
-              <span>Code atelier : <strong class="font-mono-tabular text-[#1E1B18]">{{ evt.inviteCode }}</strong></span>
-              <span aria-hidden="true">·</span>
-              <span>Échange le {{ formatEventDate(evt.eventDate) }}</span>
-              <span aria-hidden="true">·</span>
-              <span>{{ evt.location }}</span>
-              <span aria-hidden="true">·</span>
-              <span>
-                {{ evt.status === 'drawn' ? 'Tirage scellé' : evt.status === 'completed' ? 'Échange terminé' : 'En préparation' }}
-              </span>
+      @if (!store.isGuestMode()) {
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+          <!-- Colonne gauche : Détails de la fête et actions clés -->
+          <div class="lg:col-span-7 bg-white border border-[#E6DEC8] rounded-2xl p-6 sm:p-8 flex flex-col justify-between space-y-6">
+            <div class="space-y-4">
+              <!-- Métadonnées épurées sans pilules (Zero-Pill Discipline) -->
+              <div class="flex flex-wrap items-center gap-2 text-xs font-medium text-[#5C5346]">
+                <span>Code atelier : <strong class="font-mono-tabular text-[#1E1B18]">{{ evt.inviteCode }}</strong></span>
+                <span aria-hidden="true">·</span>
+                <span>Échange le {{ formatEventDate(evt.eventDate) }}</span>
+                <span aria-hidden="true">·</span>
+                <span>{{ evt.location }}</span>
+                <span aria-hidden="true">·</span>
+                <span>
+                  {{ evt.status === 'drawn' ? 'Tirage scellé' : evt.status === 'completed' ? 'Échange terminé' : 'En préparation' }}
+                </span>
+              </div>
+
+              <h1 class="font-display text-3xl sm:text-4xl font-bold text-[#1E1B18] leading-tight">
+                {{ evt.title }}
+              </h1>
+
+              <p class="text-base text-[#5C5346] leading-relaxed max-w-2xl">
+                {{ evt.subtitle || 'Préparez vos listes de souhaits, découvrez votre mission secrète avec votre code PIN et échangez anonymement avant le jour J.' }}
+              </p>
             </div>
 
-            <h1 class="font-display text-3xl sm:text-4xl font-bold text-[#1E1B18] leading-tight">
-              {{ evt.title }}
-            </h1>
+            <div class="pt-4 border-t border-[#E6DEC8] flex flex-wrap items-center justify-between gap-4">
+              <div class="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  (click)="setSection('reveal')"
+                  class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#C81E32] hover:bg-[#A61728] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <mat-icon class="!text-lg !w-5 !h-5">mail_lock</mat-icon>
+                  <span>Découvrir mon Tirage Secret</span>
+                </button>
+                <button
+                  type="button"
+                  (click)="setSection('wishes')"
+                  class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[#1E1B18] bg-[#F7F2E7] hover:bg-[#EDE4D1] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <mat-icon class="!text-lg !w-5 !h-5 text-[#166534]">card_giftcard</mat-icon>
+                  <span>Compléter ma Liste</span>
+                </button>
+              </div>
 
-            <p class="text-base text-[#5C5346] leading-relaxed max-w-2xl">
-              {{ evt.subtitle || 'Préparez vos listes de souhaits, découvrez votre mission secrète avec votre code PIN et échangez anonymement avant le jour J.' }}
-            </p>
+              <div class="text-xs text-[#5C5346]">
+                Budget conseillé : <strong class="font-mono-tabular text-sm text-[#1E1B18]">{{ evt.budget }} €</strong>
+              </div>
+            </div>
           </div>
 
-          <div class="pt-4 border-t border-[#E6DEC8] flex flex-wrap items-center justify-between gap-4">
-            <div class="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                (click)="setSection('reveal')"
-                class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#C81E32] hover:bg-[#A61728] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-              >
-                <mat-icon class="!text-lg !w-5 !h-5">mail_lock</mat-icon>
-                <span>Découvrir mon Tirage Secret</span>
-              </button>
-              <button
-                type="button"
-                (click)="setSection('wishes')"
-                class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[#1E1B18] bg-[#F7F2E7] hover:bg-[#EDE4D1] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-              >
-                <mat-icon class="!text-lg !w-5 !h-5 text-[#166534]">card_giftcard</mat-icon>
-                <span>Compléter ma Liste</span>
-              </button>
-            </div>
-
-            <div class="text-xs text-[#5C5346]">
-              Budget conseillé : <strong class="font-mono-tabular text-sm text-[#1E1B18]">{{ evt.budget }} €</strong>
+          <!-- Colonne droite : Illustration de l'atelier du Père Noël avec fallback résilient -->
+          <div class="lg:col-span-5 relative rounded-2xl overflow-hidden border border-[#E6DEC8] bg-[#2C1810] min-h-[260px]">
+            @if (!brokenImages()['hero']) {
+              <img
+                [src]="heroImageUrl"
+                alt="Illustration chaleureuse de l'atelier du Père Noël avec jouets en bois et cadeaux emballés"
+                referrerpolicy="no-referrer"
+                (error)="onImageError('hero')"
+                class="w-full h-full object-cover"
+              />
+            } @else {
+              <div class="w-full h-full flex flex-col items-center justify-center p-8 text-center text-[#FFFDF9] bg-gradient-to-br from-[#7C2D12] to-[#1E1B18]">
+                <mat-icon class="!text-5xl !w-12 !h-12 text-[#F59E0B] mb-2">forest</mat-icon>
+                <p class="font-display text-lg font-semibold">L'Atelier du Père Noël Secret</p>
+              </div>
+            }
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-6 text-white">
+              <p class="text-xs font-medium text-amber-200">Compte à rebours de l'atelier</p>
+              <p class="font-display text-2xl font-bold mt-0.5">
+                Plus que <span class="font-mono-tabular">{{ daysUntilEvent() }}</span> jours avant l'ouverture des cadeaux
+              </p>
             </div>
           </div>
-        </div>
-
-        <!-- Colonne droite : Illustration de l'atelier du Père Noël avec fallback résilient -->
-        <div class="lg:col-span-5 relative rounded-2xl overflow-hidden border border-[#E6DEC8] bg-[#2C1810] min-h-[260px]">
-          @if (!brokenImages()['hero']) {
-            <img
-              [src]="heroImageUrl"
-              alt="Illustration chaleureuse de l'atelier du Père Noël avec jouets en bois et cadeaux emballés"
-              referrerpolicy="no-referrer"
-              (error)="onImageError('hero')"
-              class="w-full h-full object-cover"
-            />
-          } @else {
-            <div class="w-full h-full flex flex-col items-center justify-center p-8 text-center text-[#FFFDF9] bg-gradient-to-br from-[#7C2D12] to-[#1E1B18]">
-              <mat-icon class="!text-5xl !w-12 !h-12 text-[#F59E0B] mb-2">forest</mat-icon>
-              <p class="font-display text-lg font-semibold">L'Atelier du Père Noël Secret</p>
-            </div>
-          }
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-6 text-white">
-            <p class="text-xs font-medium text-amber-200">Compte à rebours de l'atelier</p>
-            <p class="font-display text-2xl font-bold mt-0.5">
-              Plus que <span class="font-mono-tabular">{{ daysUntilEvent() }}</span> jours avant l'ouverture des cadeaux
-            </p>
-          </div>
-        </div>
-      </section>
+        </section>
+      }
 
       <!-- Bandeau de synthèse 4 colonnes (Chiffres tabulaires) -->
       <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 bg-white border border-[#E6DEC8] rounded-2xl p-5">
@@ -412,8 +428,12 @@
       @if (activeSection() === 'workshop') {
         <div class="space-y-10">
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            <!-- Colonne gauche (7 cols) : Participants & Ajout -->
-            <div class="lg:col-span-7 bg-white border border-[#E6DEC8] rounded-2xl p-6 space-y-6">
+            <!-- Colonne gauche : Participants & Suivi (Pleine largeur pour les invités, 7 cols pour l'organisateur) -->
+            <div
+              class="bg-white border border-[#E6DEC8] rounded-2xl p-6 space-y-6"
+              [class.lg:col-span-7]="!store.isGuestMode()"
+              [class.lg:col-span-12]="store.isGuestMode()"
+            >
               <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[#E6DEC8] pb-4">
                 <div>
                   <h2 class="font-display text-2xl font-bold text-[#1E1B18]">
@@ -425,23 +445,8 @@
                 </div>
               </div>
 
-              <!-- Formulaire d'ajout de participant ou 안내 invité -->
-              @if (store.isGuestMode()) {
-                <div class="bg-[#F0FDFA] border border-[#99F6E4] rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-[#0F766E]">
-                  <div class="flex items-center gap-2.5">
-                    <mat-icon class="!text-lg !w-5 !h-5 shrink-0 text-[#0F766E]">mark_email_read</mat-icon>
-                    <span>Vous êtes sur cet atelier en tant qu'invité grâce à votre lien direct. Accédez à vos <strong>Cartes & Codes PIN</strong> pour révéler votre cible secrète.</span>
-                  </div>
-                  <button
-                    type="button"
-                    (click)="setSection('reveal')"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-[#0F766E] text-white rounded-lg hover:bg-[#115E59] transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                  >
-                    <mat-icon class="!text-sm !w-4 !h-4">mail_lock</mat-icon>
-                    <span>Ouvrir mon Enveloppe</span>
-                  </button>
-                </div>
-              } @else {
+              <!-- Formulaire d'ajout de participant (organisateur uniquement) -->
+              @if (!store.isGuestMode()) {
                 <form
                   [formGroup]="participantForm"
                   (ngSubmit)="submitAddParticipant()"
@@ -527,90 +532,56 @@
                         </div>
                       </div>
 
-                      <div class="flex items-center gap-2 shrink-0">
-                        <button
-                          type="button"
-                          (click)="copySecretParticipantLink(row.recipient)"
-                          class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[#1E1B18] bg-[#F7F2E7] hover:bg-[#EDE4D1] rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                        >
-                          <mat-icon class="!text-sm !w-4 !h-4">link</mat-icon>
-                          <span>Lien secret</span>
-                        </button>
-                        <button
-                          type="button"
-                          (click)="setSection('reveal'); openPinModal(row.recipient)"
-                          class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-[#C81E32] bg-[#FEF2F2] hover:bg-[#FEE2E2] rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                        >
-                          <mat-icon class="!text-sm !w-4 !h-4">lock_open</mat-icon>
-                          <span>Ouvrir carte</span>
-                        </button>
-                        @if (!store.isGuestMode() && evt.status === 'draft') {
+                      <!-- Actions participant (Organisateur uniquement) -->
+                      @if (!store.isGuestMode()) {
+                        <div class="flex items-center gap-2 shrink-0">
                           <button
                             type="button"
-                            (click)="store.removeParticipant(row.recipient.id)"
-                            aria-label="Retirer ce participant"
-                            class="inline-flex items-center p-1.5 text-[#5C5346] hover:text-[#C81E32] rounded-lg transition-colors cursor-pointer"
+                            (click)="copySecretParticipantLink(row.recipient)"
+                            class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[#1E1B18] bg-[#F7F2E7] hover:bg-[#EDE4D1] rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                           >
-                            <mat-icon class="!text-base !w-4 !h-4">delete_outline</mat-icon>
+                            <mat-icon class="!text-sm !w-4 !h-4">link</mat-icon>
+                            <span>Lien secret</span>
                           </button>
-                        }
-                      </div>
+                          <button
+                            type="button"
+                            (click)="setSection('reveal'); openPinModal(row.recipient)"
+                            class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-[#C81E32] bg-[#FEF2F2] hover:bg-[#FEE2E2] rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                          >
+                            <mat-icon class="!text-sm !w-4 !h-4">lock_open</mat-icon>
+                            <span>Ouvrir carte</span>
+                          </button>
+                          @if (evt.status === 'draft') {
+                            <button
+                              type="button"
+                              (click)="store.removeParticipant(row.recipient.id)"
+                              aria-label="Retirer ce participant"
+                              class="inline-flex items-center p-1.5 text-[#5C5346] hover:text-[#C81E32] rounded-lg transition-colors cursor-pointer"
+                            >
+                              <mat-icon class="!text-base !w-4 !h-4">delete_outline</mat-icon>
+                            </button>
+                          }
+                        </div>
+                      }
                     </div>
                   }
                 </div>
               }
             </div>
 
-            <!-- Colonne droite (5 cols) : Règles d'Exclusion & Moteur de Tirage -->
-            <div class="lg:col-span-5 bg-white border border-[#E6DEC8] rounded-2xl p-6 space-y-6">
-              <div class="border-b border-[#E6DEC8] pb-4">
-                <h2 class="font-display text-2xl font-bold text-[#1E1B18]">
-                  02. Règles d'Exclusion &amp; Tirage
-                </h2>
-                <p class="text-sm text-[#5C5346] mt-0.5">
-                  Évitez que les couples ou les binômes de l'an dernier ne se tirent au sort.
-                </p>
-              </div>
-
-              @if (store.isGuestMode()) {
-                <div class="bg-[#F7F2E7] p-6 rounded-xl space-y-4">
-                  <div class="flex items-center gap-2.5 text-sm font-semibold text-[#1E1B18]">
-                    <mat-icon class="!text-lg !w-5 !h-5 text-[#0F766E]">verified</mat-icon>
-                    <span>Atelier configuré par l'Organisateur</span>
-                  </div>
-                  <p class="text-xs text-[#5C5346] leading-relaxed">
-                    L'organisateur a finalisé la liste des participants et scellé les enveloppes secrètes du tirage au sort.
+            <!-- Colonne droite (5 cols) : Règles d'Exclusion & Moteur de Tirage (Organisateur uniquement) -->
+            @if (!store.isGuestMode()) {
+              <div class="lg:col-span-5 bg-white border border-[#E6DEC8] rounded-2xl p-6 space-y-6">
+                <div class="border-b border-[#E6DEC8] pb-4">
+                  <h2 class="font-display text-2xl font-bold text-[#1E1B18]">
+                    02. Règles d'Exclusion &amp; Tirage
+                  </h2>
+                  <p class="text-sm text-[#5C5346] mt-0.5">
+                    Évitez que les couples ou les binômes de l'an dernier ne se tirent au sort.
                   </p>
-                  <div class="p-3.5 bg-white border border-[#E6DEC8] rounded-xl text-xs text-[#5C5346] space-y-2">
-                    <div class="flex items-center justify-between">
-                      <span>Statut de l'atelier :</span>
-                      <strong class="text-[#166534]">
-                        {{ evt.status === 'drawn' ? 'Tirage scellé' : evt.status === 'completed' ? 'Échange terminé' : 'En préparation' }}
-                      </strong>
-                    </div>
-                    <div class="flex items-center justify-between">
-                      <span>Budget suggéré :</span>
-                      <strong class="text-[#1E1B18]">{{ evt.budget }} €</strong>
-                    </div>
-                    <div class="flex items-center justify-between">
-                      <span>Date de la fête :</span>
-                      <strong class="text-[#1E1B18]">{{ formatEventDate(evt.eventDate) }}</strong>
-                    </div>
-                  </div>
-                  <p class="text-xs text-[#5C5346] leading-relaxed">
-                    Rendez-vous dans la section <strong>Cartes &amp; Codes PIN</strong> pour décacheter votre enveloppe avec votre code PIN personnel et découvrir à qui vous offrirez un cadeau !
-                  </p>
-                  <button
-                    type="button"
-                    (click)="setSection('reveal')"
-                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-xs font-semibold text-white bg-[#C81E32] hover:bg-[#A61728] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                  >
-                    <mat-icon class="!text-base !w-4 !h-4">mail_lock</mat-icon>
-                    <span>Ouvrir les Enveloppes Secrètes</span>
-                  </button>
                 </div>
-              } @else {
-              <!-- Ajout d'une exclusion -->
+
+                <!-- Ajout d'une exclusion -->
               <form
                 [formGroup]="exclusionForm"
                 (ngSubmit)="submitExclusionRule()"
@@ -837,11 +808,11 @@
                   }
                 </div>
               </div>
-              }
             </div>
-          </div>
+          }
         </div>
-      }
+      </div>
+    }
 
       <!-- =================================================================== -->
       <!-- VUE 2 : CARTES & CODES PIN (Révélation Secrète & Mission)           -->

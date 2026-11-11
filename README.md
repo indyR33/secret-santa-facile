@@ -157,9 +157,12 @@ Si une fête est terminée ou annulée et que vous souhaitez faire du ménage :
 ### Accéder à sa carte uniquement avec son lien (Sans connexion)
 1. Cliquez sur le lien secret reçu de votre organisateur (par SMS, WhatsApp, e-mail, etc.).
 2. **Aucune création de compte ni mot de passe organisateur n'est demandée** : vous êtes automatiquement reconnu en mode invité sur le véritable atelier de votre fête.
-3. Si le lien était personnalisé à votre prénom, la fenêtre de saisie de votre code PIN s'ouvre directement. Sinon, repérez votre enveloppe portant vos initiales et votre nom, puis cliquez sur **« Déverrouiller (PIN) »**.
-4. Saisissez votre **code PIN à 4 chiffres** (par défaut `1234` lors de la création, ou le code convenu avec votre organisateur).
-5. Cliquez sur **« Briser le sceau et révéler »**.
+3. **Interface épurée et confidentielle pour les participants** :
+   - Les blocs d'administration réservés à l'organisateur (bannière hero encombrante, barre d'outils d'événements, boutons « Lien secret » et « Ouvrir carte » sur la liste des participants, panneau de gestion des règles d'exclusion et de tirage forcé) sont automatiquement masqués.
+   - La liste des participants s'affiche en pleine largeur avec un design calme et lisible.
+4. Si le lien était personnalisé à votre prénom, la fenêtre de saisie de votre code PIN s'ouvre directement. Sinon, rendez-vous dans la section **« Cartes & Codes PIN »**, repérez votre enveloppe portant vos initiales et votre nom, puis cliquez sur **« Déverrouiller (PIN) »**.
+5. Saisissez votre **code PIN à 4 chiffres** (par défaut `1234` lors de la création, ou le code convenu avec votre organisateur).
+6. Cliquez sur **« Briser le sceau et révéler »**.
 
 ### Découvrir sa mission secrète
 Une fois déverrouillée, la bannière de mission s'illumine en vert :
