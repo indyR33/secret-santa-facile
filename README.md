@@ -157,10 +157,12 @@ Si une fête est terminée ou annulée et que vous souhaitez faire du ménage :
 ### Accéder à sa carte uniquement avec son lien (Sans connexion)
 1. Cliquez sur le lien secret reçu de votre organisateur (par SMS, WhatsApp, e-mail, etc.).
 2. **Aucune création de compte ni mot de passe organisateur n'est demandée** : vous êtes automatiquement reconnu en mode invité sur le véritable atelier de votre fête.
-3. **Interface épurée et confidentielle pour les participants** :
-   - Les blocs d'administration réservés à l'organisateur (bannière hero encombrante, barre d'outils d'événements, boutons « Lien secret » et « Ouvrir carte » sur la liste des participants, panneau de gestion des règles d'exclusion et de tirage forcé) sont automatiquement masqués.
-   - La liste des participants s'affiche en pleine largeur avec un design calme et lisible.
-4. Si le lien était personnalisé à votre prénom, la fenêtre de saisie de votre code PIN s'ouvre directement. Sinon, rendez-vous dans la section **« Cartes & Codes PIN »**, repérez votre enveloppe portant vos initiales et votre nom, puis cliquez sur **« Déverrouiller (PIN) »**.
+3. **Interface ultra-épurée et confidentielle pour les participants** :
+   - Les blocs d'administration réservés à l'organisateur (bannière hero, barre d'outils, boutons d'administration de chaque participant, panneau des règles d'exclusion et tirage forcé) sont automatiquement masqués.
+   - Les indicateurs chiffrés du bandeau supérieur sont allégés : seuls les chiffres clés (participants inscrits, budget, avancement %, courriers) sont affichés sans les sous-textes détaillés superflus.
+   - La galerie publique des enveloppes de tous les participants est retirée : le participant accède directement à sa propre enveloppe via un déverrouillage sécurisé, puis consulte exclusivement son panneau de mission personnel sans être exposé aux enveloppes des autres participants.
+   - La liste des lutins s'affiche en pleine largeur avec un design calme, sobre et sans boutons d'action d'organisateur.
+4. Si le lien était personnalisé à votre prénom, la fenêtre de saisie de votre code PIN s'ouvre directement. Sinon, rendez-vous dans la section **« Cartes & Codes PIN »**, cliquez sur **« Déverrouiller mon Enveloppe »**, choisissez votre prénom et saisissez votre code PIN.
 5. Saisissez votre **code PIN à 4 chiffres** (par défaut `1234` lors de la création, ou le code convenu avec votre organisateur).
 6. Cliquez sur **« Briser le sceau et révéler »**.
 

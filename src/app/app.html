@@ -386,9 +386,11 @@
           <p class="font-mono-tabular text-2xl font-bold text-[#1E1B18]">
             {{ store.giftStats().total }}
           </p>
-          <p class="text-xs text-[#5C5346]">
-            {{ store.giftStats().revealed }} sur {{ store.giftStats().total }} ont ouvert leur enveloppe
-          </p>
+          @if (!store.isGuestMode()) {
+            <p class="text-xs text-[#5C5346]">
+              {{ store.giftStats().revealed }} sur {{ store.giftStats().total }} ont ouvert leur enveloppe
+            </p>
+          }
         </div>
 
         <div class="space-y-1 lg:px-4 lg:border-r border-[#E6DEC8]">
@@ -396,9 +398,11 @@
           <p class="font-mono-tabular text-2xl font-bold text-[#1E1B18]">
             {{ evt.budget }} €
           </p>
-          <p class="text-xs text-[#5C5346]">
-            {{ store.wishes().length }} idées cadeaux partagées
-          </p>
+          @if (!store.isGuestMode()) {
+            <p class="text-xs text-[#5C5346]">
+              {{ store.wishes().length }} idées cadeaux partagées
+            </p>
+          }
         </div>
 
         <div class="space-y-1 pr-4 lg:px-4 lg:border-r border-[#E6DEC8]">
@@ -406,9 +410,11 @@
           <p class="font-mono-tabular text-2xl font-bold text-[#166534]">
             {{ store.giftStats().progressPercent }} %
           </p>
-          <p class="text-xs text-[#5C5346]">
-            {{ store.giftStats().ready }} prêts · {{ store.giftStats().wrapped }} emballés · {{ store.giftStats().bought }} achetés
-          </p>
+          @if (!store.isGuestMode()) {
+            <p class="text-xs text-[#5C5346]">
+              {{ store.giftStats().ready }} prêts · {{ store.giftStats().wrapped }} emballés · {{ store.giftStats().bought }} achetés
+            </p>
+          }
         </div>
 
         <div class="space-y-1 lg:pl-4">
@@ -416,9 +422,11 @@
           <p class="font-mono-tabular text-2xl font-bold text-[#1E1B18]">
             {{ store.messages().length }}
           </p>
-          <p class="text-xs text-[#5C5346]">
-            Questions-réponses secrètes échangées
-          </p>
+          @if (!store.isGuestMode()) {
+            <p class="text-xs text-[#5C5346]">
+              Questions-réponses secrètes échangées
+            </p>
+          }
         </div>
       </section>
 
@@ -829,7 +837,7 @@
               </p>
             </div>
 
-            @if (!store.currentUser()) {
+            @if (!store.currentUser() && !store.isGuestMode()) {
               <button
                 type="button"
                 (click)="showDemoPinHint.set(!showDemoPinHint())"
@@ -1040,76 +1048,111 @@
             </section>
           }
 
-          <!-- Grille des Enveloppes de Participants -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            @for (p of store.participants(); track p.id) {
-              <div class="bg-white border border-[#E6DEC8] rounded-2xl overflow-hidden flex flex-col justify-between">
-                <div class="relative h-36 bg-[#F7F2E7] border-b border-[#E6DEC8] overflow-hidden">
-                  @if (!brokenImages()['env_' + p.id]) {
-                    <img
-                      [src]="envelopeImageUrl"
-                      [alt]="'Enveloppe scellée de ' + p.name"
-                      referrerpolicy="no-referrer"
-                      (error)="onImageError('env_' + p.id)"
-                      class="w-full h-full object-cover"
-                    />
-                  } @else {
-                    <div class="w-full h-full flex items-center justify-center bg-[#F7F2E7] text-[#C81E32]">
-                      <mat-icon class="!text-4xl !w-10 !h-10">mail</mat-icon>
-                    </div>
-                  }
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent p-4 flex items-end justify-between text-white">
+          <!-- Accès Enveloppe pour les Invités non déverrouillés -->
+          @if (store.isGuestMode() && !unlockedParticipant()) {
+            <div class="bg-white border border-[#E6DEC8] rounded-2xl p-8 text-center max-w-md mx-auto space-y-5">
+              <div class="w-16 h-16 mx-auto rounded-2xl bg-[#FEF2F2] border border-[#FECACA] flex items-center justify-center text-[#C81E32]">
+                <mat-icon class="!text-3xl !w-8 !h-8">mail_lock</mat-icon>
+              </div>
+              <div class="space-y-1">
+                <h3 class="font-display text-2xl font-bold text-[#1E1B18]">Déverrouiller mon Enveloppe</h3>
+                <p class="text-xs text-[#5C5346]">Choisissez votre prénom pour décacheter votre mission avec votre code PIN personnel.</p>
+              </div>
+              <div class="flex flex-col gap-2 pt-2">
+                @for (p of store.participants(); track p.id) {
+                  <button
+                    type="button"
+                    (click)="openPinModal(p)"
+                    class="inline-flex items-center justify-between px-4 py-3 text-xs font-semibold bg-[#F7F2E7] hover:bg-[#EDE4D1] text-[#1E1B18] rounded-xl transition-colors cursor-pointer"
+                  >
                     <div class="flex items-center gap-2.5">
-                      <span
-                        class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0"
-                        [style.background-color]="p.avatarColor"
-                      >
+                      <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0" [style.background-color]="p.avatarColor">
                         {{ getParticipantInitials(p.name) }}
                       </span>
-                      <span class="font-display text-lg font-bold truncate">{{ p.name }}</span>
+                      <span class="text-sm font-medium">{{ p.name }}</span>
                     </div>
-                  </div>
-                </div>
-
-                <div class="p-5 space-y-4 flex-1 flex flex-col justify-between">
-                  <div class="space-y-1.5">
-                    <div class="flex items-center gap-2 text-xs text-[#5C5346]">
-                      <span>{{ p.hasRevealed ? 'Enveloppe déjà consultée' : 'Enveloppe encore scellée' }}</span>
-                      <span aria-hidden="true">·</span>
-                      <span>Son cadeau préparé : <strong>{{ getGiftStatusLabel(p.giftStatus) }}</strong></span>
-                    </div>
-                    <p class="text-xs text-[#5C5346] line-clamp-2">
-                      {{ p.roleNote || 'Participant au Secret Santa' }}
-                    </p>
-                  </div>
-
-                  <div class="pt-3 border-t border-[#E6DEC8] flex items-center justify-between gap-2">
-                    <button
-                      type="button"
-                      (click)="copySecretParticipantLink(p)"
-                      class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-[#1E1B18] bg-[#F7F2E7] hover:bg-[#EDE4D1] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                    >
-                      <mat-icon class="!text-base !w-4 !h-4">content_copy</mat-icon>
-                      <span>Copier lien</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      (click)="openPinModal(p)"
-                      class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-[#C81E32] hover:bg-[#A61728] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                    >
-                      <mat-icon class="!text-base !w-4 !h-4">
-                        {{ unlockedParticipantId() === p.id ? 'visibility' : 'lock_open' }}
-                      </mat-icon>
-                      <span>
-                        {{ unlockedParticipantId() === p.id ? 'Mission ouverte' : 'Déverrouiller (PIN)' }}
-                      </span>
-                    </button>
-                  </div>
-                </div>
+                    <span class="text-[#C81E32] flex items-center gap-1 font-semibold text-xs">
+                      <span>Ouvrir</span>
+                      <mat-icon class="!text-sm !w-4 !h-4">lock_open</mat-icon>
+                    </span>
+                  </button>
+                }
               </div>
-            }
-          </div>
+            </div>
+          }
+
+          <!-- Grille des Enveloppes de Participants (Organisateur uniquement) -->
+          @if (!store.isGuestMode()) {
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              @for (p of store.participants(); track p.id) {
+                <div class="bg-white border border-[#E6DEC8] rounded-2xl overflow-hidden flex flex-col justify-between">
+                  <div class="relative h-36 bg-[#F7F2E7] border-b border-[#E6DEC8] overflow-hidden">
+                    @if (!brokenImages()['env_' + p.id]) {
+                      <img
+                        [src]="envelopeImageUrl"
+                        [alt]="'Enveloppe scellée de ' + p.name"
+                        referrerpolicy="no-referrer"
+                        (error)="onImageError('env_' + p.id)"
+                        class="w-full h-full object-cover"
+                      />
+                    } @else {
+                      <div class="w-full h-full flex items-center justify-center bg-[#F7F2E7] text-[#C81E32]">
+                        <mat-icon class="!text-4xl !w-10 !h-10">mail</mat-icon>
+                      </div>
+                    }
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent p-4 flex items-end justify-between text-white">
+                      <div class="flex items-center gap-2.5">
+                        <span
+                          class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0"
+                          [style.background-color]="p.avatarColor"
+                        >
+                          {{ getParticipantInitials(p.name) }}
+                        </span>
+                        <span class="font-display text-lg font-bold truncate">{{ p.name }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="p-5 space-y-4 flex-1 flex flex-col justify-between">
+                    <div class="space-y-1.5">
+                      <div class="flex items-center gap-2 text-xs text-[#5C5346]">
+                        <span>{{ p.hasRevealed ? 'Enveloppe déjà consultée' : 'Enveloppe encore scellée' }}</span>
+                        <span aria-hidden="true">·</span>
+                        <span>Son cadeau préparé : <strong>{{ getGiftStatusLabel(p.giftStatus) }}</strong></span>
+                      </div>
+                      <p class="text-xs text-[#5C5346] line-clamp-2">
+                        {{ p.roleNote || 'Participant au Secret Santa' }}
+                      </p>
+                    </div>
+
+                    <div class="pt-3 border-t border-[#E6DEC8] flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        (click)="copySecretParticipantLink(p)"
+                        class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-[#1E1B18] bg-[#F7F2E7] hover:bg-[#EDE4D1] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                      >
+                        <mat-icon class="!text-base !w-4 !h-4">content_copy</mat-icon>
+                        <span>Copier lien</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        (click)="openPinModal(p)"
+                        class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-[#C81E32] hover:bg-[#A61728] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                      >
+                        <mat-icon class="!text-base !w-4 !h-4">
+                          {{ unlockedParticipantId() === p.id ? 'visibility' : 'lock_open' }}
+                        </mat-icon>
+                        <span>
+                          {{ unlockedParticipantId() === p.id ? 'Mission ouverte' : 'Déverrouiller (PIN)' }}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
         </div>
       }
 
