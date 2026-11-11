@@ -4,6 +4,7 @@ import {
   OnInit,
   PLATFORM_ID,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -283,6 +284,38 @@ export class App implements OnInit {
     }
   });
 
+  private hasProcessedDeepLink = false;
+
+  constructor() {
+    effect(() => {
+      const participants = this.store.participants();
+      if (!this.isBrowser) return;
+
+      const params = new URLSearchParams(window.location.search);
+      const deepParticipantId = params.get('participant');
+      const deepEventId = params.get('event');
+
+      // Dès qu'un lien contient un identifiant d'événement ou de participant et qu'on est en mode invité,
+      // on positionne la vue directement sur les enveloppes secrètes
+      if ((deepEventId || deepParticipantId) && !this.store.currentUser()) {
+        this.activeSection.set('reveal');
+      }
+
+      // Si le lien cible un participant particulier et que la liste est chargée depuis Firestore
+      if (deepParticipantId && !this.hasProcessedDeepLink && participants.length > 0) {
+        const found = participants.find((p) => p.id === deepParticipantId);
+        if (found) {
+          this.hasProcessedDeepLink = true;
+          this.activeSection.set('reveal');
+          this.openPinModal(found);
+          this.store.showToast(
+            `Bienvenue ${found.name} ! Déverrouillez votre enveloppe secrète avec votre code PIN.`
+          );
+        }
+      }
+    });
+  }
+
   ngOnInit(): void {
     const firstPart = this.store.participants()[0];
     const secondPart = this.store.participants()[1];
@@ -296,18 +329,6 @@ export class App implements OnInit {
         giverId: firstPart.id,
         forcedReceiverId: secondPart?.id ?? '',
       });
-    }
-
-    if (this.isBrowser) {
-      const params = new URLSearchParams(window.location.search);
-      const deepParticipantId = params.get('participant');
-      if (deepParticipantId) {
-        const found = this.store.participants().find((p) => p.id === deepParticipantId);
-        if (found) {
-          this.activeSection.set('reveal');
-          this.openPinModal(found);
-        }
-      }
     }
   }
 
@@ -560,6 +581,17 @@ export class App implements OnInit {
       void navigator.clipboard.writeText(link);
     }
     this.store.showToast(`Lien individuel de ${participant.name} copié dans le presse-papiers !`);
+  }
+
+  copyEventLink(): void {
+    if (!this.isBrowser) return;
+    const baseUrl = window.location.origin + window.location.pathname;
+    const evtId = this.store.activeEvent()?.id ?? '';
+    const link = `${baseUrl}?event=${encodeURIComponent(evtId)}`;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      void navigator.clipboard.writeText(link);
+    }
+    this.store.showToast("Lien d'accès à cet atelier copié dans le presse-papiers !");
   }
 
   async setMyGiftStatus(status: GiftStatus): Promise<void> {

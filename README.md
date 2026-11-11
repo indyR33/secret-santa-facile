@@ -132,10 +132,10 @@ Dans la sous-section dédiée bordée de rouge : **« 🔒 Règle Secrète : Tir
 3. Les enveloppes sont alors scellées et le statut passe à *« Tirage validé »*.
 4. *Remarque :* Si une modification doit intervenir avant Noël, cliquez sur **« Réinitialiser »** pour réouvrir le tirage.
 
-### Étape 6 : Transmettre les accès aux participants
-Deux méthodes simples sont à votre disposition :
-- **Méthode 1 (Lien direct personnalisé)** : Sur chaque participant, cliquez sur **« Lien secret »** pour copier son URL d'accès direct dans le presse-papiers (ex. `https://mon-app/?event=...&participant=...`). Envoyez ce lien par SMS, WhatsApp, Slack ou e-mail.
-- **Méthode 2 (Lien global de l'événement)** : Partagez le lien général de l'application. Chacun clique sur son prénom dans l'onglet des cartes et saisit son code PIN.
+### Étape 6 : Transmettre les accès aux participants (Accès Invité sans inscription)
+Les participants n'ont **aucune obligation de se connecter ou de créer un compte**. L'accès est instantané et direct :
+- **Méthode 1 (Lien individuel secret recommandé)** : Sur la ligne de chaque participant, cliquez sur **« Lien secret »** pour copier son URL d'accès direct (`?event=...&participant=...`). Lorsqu'il ouvre ce lien sur son smartphone ou son ordinateur, l'application charge directement l'atelier réel depuis Firestore, se positionne sur ses cartes et ouvre la boîte de saisie de son code PIN.
+- **Méthode 2 (Lien général de l'atelier)** : Cliquez sur le bouton vert **« Partager l'atelier »** dans la barre supérieure pour copier l'URL globale de l'événement (`?event=...`). Chaque invité n'a plus qu'à cliquer sur son enveloppe et saisir son code PIN.
 
 ### Étape 7 : Suivre l'avancement global sans divulgation
 Sur le tableau de bord :
@@ -145,20 +145,20 @@ Sur le tableau de bord :
 ### Étape 8 : Supprimer un atelier (irréversible)
 Si une fête est terminée ou annulée et que vous souhaitez faire du ménage :
 1. Dans le sélecteur d'événement en haut de la page, choisissez l'atelier à supprimer.
-2. Cliquez sur le bouton rouge **« Supprimer l'atelier »** situé à côté du menu déroulant.
+2. Cliquez sur le bouton rouge **« Supprimer l'atelier »** situé à côté du menu déroulant (visible uniquement pour l'organisateur connecté).
 3. Une boîte de dialogue de confirmation récapitule le nom de la fête et son code d'invitation.
 4. Cliquez sur **« Confirmer la suppression »**.
-5. L'atelier, tous ses participants, le tirage au sort, les listes de souhaits et les messages anonymes sont définitivement supprimés (en local ou directement sur Firestore si vous êtes connecté).
+5. L'atelier, tous ses participants, le tirage au sort, les listes de souhaits et les messages anonymes sont définitivement supprimés de Firestore.
 
 ---
 
 ## 🎁 Guide du Participant
 
-### Accéder à sa carte avec son code PIN
-1. Ouvrez le lien reçu ou rendez-vous dans l'onglet **« Cartes & Codes PIN »**.
-2. Repérez votre enveloppe portant vos initiales et votre nom.
-3. Cliquez sur **« Déverrouiller (PIN) »**.
-4. Entrez votre **code PIN à 4 chiffres** (par défaut `1234` sur les ateliers d'exemple, ou le code convenu avec l'organisateur).
+### Accéder à sa carte uniquement avec son lien (Sans connexion)
+1. Cliquez sur le lien secret reçu de votre organisateur (par SMS, WhatsApp, e-mail, etc.).
+2. **Aucune création de compte ni mot de passe organisateur n'est demandée** : vous êtes automatiquement reconnu en mode invité sur le véritable atelier de votre fête.
+3. Si le lien était personnalisé à votre prénom, la fenêtre de saisie de votre code PIN s'ouvre directement. Sinon, repérez votre enveloppe portant vos initiales et votre nom, puis cliquez sur **« Déverrouiller (PIN) »**.
+4. Saisissez votre **code PIN à 4 chiffres** (par défaut `1234` lors de la création, ou le code convenu avec votre organisateur).
 5. Cliquez sur **« Briser le sceau et révéler »**.
 
 ### Découvrir sa mission secrète

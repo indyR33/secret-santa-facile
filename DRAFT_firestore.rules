@@ -79,7 +79,7 @@ service cloud.firestore {
         data.eventId is string && data.eventId.size() >= 1 && data.eventId.size() <= 128 &&
         data.eventId.matches('^[a-zA-Z0-9_\\-]+$') && data.eventId == eventId &&
         data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
-        data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') && data.ownerId == request.auth.uid &&
+        data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') &&
         data.name is string && data.name.size() >= 1 && data.name.size() <= 60 &&
         data.roleNote is string && data.roleNote.size() >= 0 && data.roleNote.size() <= 100 &&
         data.avatarColor is string && data.avatarColor.size() >= 4 && data.avatarColor.size() <= 32 &&
@@ -113,7 +113,7 @@ service cloud.firestore {
         data.participantId is string && data.participantId.size() >= 1 && data.participantId.size() <= 128 &&
         data.participantId.matches('^[a-zA-Z0-9_\\-]+$') &&
         data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
-        data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') && data.ownerId == request.auth.uid &&
+        data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') &&
         data.title is string && data.title.size() >= 1 && data.title.size() <= 120 &&
         data.details is string && data.details.size() >= 0 && data.details.size() <= 300 &&
         data.linkUrl is string && data.linkUrl.size() >= 0 && data.linkUrl.size() <= 500 &&
@@ -140,7 +140,7 @@ service cloud.firestore {
         data.targetParticipantId.matches('^[a-zA-Z0-9_\\-]+$') &&
         data.senderRole is string && (data.senderRole == 'santa' || data.senderRole == 'recipient') &&
         data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
-        data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') && data.ownerId == request.auth.uid &&
+        data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') &&
         data.content is string && data.content.size() >= 1 && data.content.size() <= 500 &&
         data.createdAt is timestamp &&
         data.updatedAt is timestamp && data.updatedAt == request.time;
@@ -150,7 +150,9 @@ service cloud.firestore {
     // 3. COLLECTION : /events/{eventId}
     // =========================================================================
     match /events/{eventId} {
-      allow get: if isVerified() && isValidId(eventId) && existing().ownerId == request.auth.uid;
+      // Les participants munis du lien direct de l'événement peuvent le lire
+      allow get: if isValidId(eventId);
+      // Seul l'organisateur connecté peut lister l'ensemble de ses événements
       allow list: if isVerified() && existing().ownerId == request.auth.uid;
 
       allow create: if isVerified() &&
@@ -180,44 +182,38 @@ service cloud.firestore {
       // 4. SOUS-COLLECTION : /events/{eventId}/participants/{participantId}
       // =======================================================================
       match /participants/{participantId} {
-        allow get: if isVerified() &&
-          isValidId(eventId) &&
-          isValidId(participantId) &&
-          existing().ownerId == request.auth.uid &&
-          isEventOwner(eventId);
+        // Les participants munis du lien de l'événement peuvent lire la liste des participants
+        allow get, list: if isValidId(eventId);
 
-        allow list: if isVerified() && existing().ownerId == request.auth.uid;
-
+        // Seul l'organisateur connecté peut créer des participants
         allow create: if isVerified() &&
           isValidId(eventId) &&
           isValidId(participantId) &&
           isValidParticipant(incoming(), eventId) &&
+          incoming().ownerId == request.auth.uid &&
           incoming().createdAt == request.time &&
           isEventOwner(eventId);
 
         allow update: if (
-          isVerified() &&
           isValidId(eventId) &&
           isValidId(participantId) &&
           isValidParticipant(incoming(), eventId) &&
-          existing().ownerId == request.auth.uid &&
           incoming().ownerId == existing().ownerId &&
           incoming().eventId == existing().eventId &&
-          incoming().createdAt == existing().createdAt &&
-          isEventOwner(eventId) && (
-            // Action 1 : Mise à jour des règles d'exclusion, de tirage forcé ou du profil
-            incoming().diff(existing()).affectedKeys().hasOnly(['name', 'roleNote', 'avatarColor', 'pinCode', 'excludedIds', 'forcedReceiverId', 'updatedAt']) ||
-            // Action 2 : Attribution lors du tirage au sort
-            incoming().diff(existing()).affectedKeys().hasOnly(['assignedToId', 'hasRevealed', 'giftStatus', 'updatedAt']) ||
-            // Action 3 : Révélation de la mission ou avancement du cadeau
+          incoming().createdAt == existing().createdAt && (
+            // Action 1 : L'organisateur met à jour le profil, exclusions, règle forcée
+            (isVerified() && isEventOwner(eventId) && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'roleNote', 'avatarColor', 'pinCode', 'excludedIds', 'forcedReceiverId', 'updatedAt'])) ||
+            // Action 2 : L'organisateur valide le tirage au sort
+            (isVerified() && isEventOwner(eventId) && incoming().diff(existing()).affectedKeys().hasOnly(['assignedToId', 'hasRevealed', 'giftStatus', 'updatedAt'])) ||
+            // Action 3 : Le participant révèle sa mission avec son PIN, actualise son avancement ou change son PIN
             incoming().diff(existing()).affectedKeys().hasOnly(['hasRevealed', 'giftStatus', 'pinCode', 'updatedAt'])
           )
         );
 
+        // Seul l'organisateur connecté peut supprimer des participants
         allow delete: if isVerified() &&
           isValidId(eventId) &&
           isValidId(participantId) &&
-          existing().ownerId == request.auth.uid &&
           isEventOwner(eventId);
       }
 
@@ -225,63 +221,43 @@ service cloud.firestore {
       // 5. SOUS-COLLECTION : /events/{eventId}/wishes/{wishId}
       // =======================================================================
       match /wishes/{wishId} {
-        allow get: if isVerified() &&
-          isValidId(eventId) &&
-          isValidId(wishId) &&
-          existing().ownerId == request.auth.uid &&
-          isEventOwner(eventId);
+        allow get, list: if isValidId(eventId);
 
-        allow list: if isVerified() && existing().ownerId == request.auth.uid;
-
-        allow create: if isVerified() &&
-          isValidId(eventId) &&
+        allow create: if isValidId(eventId) &&
           isValidId(wishId) &&
           isValidWishItem(incoming(), eventId) &&
           incoming().createdAt == request.time &&
-          isEventOwner(eventId) &&
           exists(/databases/$(database)/documents/events/$(eventId)/participants/$(incoming().participantId));
 
         allow update: if (
-          isVerified() &&
           isValidId(eventId) &&
           isValidId(wishId) &&
           isValidWishItem(incoming(), eventId) &&
-          existing().ownerId == request.auth.uid &&
-          incoming().ownerId == existing().ownerId &&
           incoming().eventId == existing().eventId &&
           incoming().participantId == existing().participantId &&
-          incoming().createdAt == existing().createdAt &&
-          isEventOwner(eventId) && (
+          incoming().createdAt == existing().createdAt && (
             // Action 1 : Modification des détails d'un souhait
             incoming().diff(existing()).affectedKeys().hasOnly(['title', 'details', 'linkUrl', 'estimatedPrice', 'priority', 'updatedAt'])
           )
         );
 
-        allow delete: if isVerified() &&
-          isValidId(eventId) &&
-          isValidId(wishId) &&
-          existing().ownerId == request.auth.uid &&
-          isEventOwner(eventId);
+        allow delete: if isValidId(eventId) &&
+          isValidId(wishId) && (
+            (isVerified() && isEventOwner(eventId)) ||
+            (existing().participantId != null)
+          );
       }
 
       // =======================================================================
       // 6. SOUS-COLLECTION : /events/{eventId}/messages/{messageId}
       // =======================================================================
       match /messages/{messageId} {
-        allow get: if isVerified() &&
-          isValidId(eventId) &&
-          isValidId(messageId) &&
-          existing().ownerId == request.auth.uid &&
-          isEventOwner(eventId);
+        allow get, list: if isValidId(eventId);
 
-        allow list: if isVerified() && existing().ownerId == request.auth.uid;
-
-        allow create: if isVerified() &&
-          isValidId(eventId) &&
+        allow create: if isValidId(eventId) &&
           isValidId(messageId) &&
           isValidAnonymousMessage(incoming(), eventId) &&
           incoming().createdAt == request.time &&
-          isEventOwner(eventId) &&
           exists(/databases/$(database)/documents/events/$(eventId)/participants/$(incoming().targetParticipantId));
 
         allow update: if (
@@ -289,8 +265,6 @@ service cloud.firestore {
           isValidId(eventId) &&
           isValidId(messageId) &&
           isValidAnonymousMessage(incoming(), eventId) &&
-          existing().ownerId == request.auth.uid &&
-          incoming().ownerId == existing().ownerId &&
           incoming().eventId == existing().eventId &&
           incoming().targetParticipantId == existing().targetParticipantId &&
           incoming().senderRole == existing().senderRole &&
@@ -304,7 +278,6 @@ service cloud.firestore {
         allow delete: if isVerified() &&
           isValidId(eventId) &&
           isValidId(messageId) &&
-          existing().ownerId == request.auth.uid &&
           isEventOwner(eventId);
       }
     }

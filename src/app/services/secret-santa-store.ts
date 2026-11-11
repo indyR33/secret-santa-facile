@@ -108,11 +108,12 @@ export class SecretSantaStore {
   readonly toastMessage = signal<string | null>(null);
   readonly errorBanner = signal<string | null>(null);
 
-  // Données Cloud Firestore (lorsque connecté)
+  // Données Cloud Firestore (lorsque connecté ou invité via lien direct)
   private readonly cloudEvents = signal<SecretSantaEvent[]>([]);
   private readonly cloudParticipants = signal<Participant[]>([]);
   private readonly cloudWishes = signal<WishItem[]>([]);
   private readonly cloudMessages = signal<AnonymousMessage[]>([]);
+  readonly guestEvent = signal<SecretSantaEvent | null>(null);
 
   // Données Atelier Démo / Local (avant connexion ou pour essai immédiat)
   private readonly localEvents = signal<SecretSantaEvent[]>(this.createInitialLocalEvents());
@@ -122,15 +123,20 @@ export class SecretSantaStore {
 
   readonly activeEventId = signal<string>('evt_famille_moreau_2026');
 
-  // Signaux dérivés unifiés (Cloud si connecté avec événements ou mode Cloud actif, sinon Atelier Local)
+  // Mode invité : accède via lien direct sans compte organisateur
+  readonly isGuestMode = computed(() => !this.currentUser() && Boolean(this.guestEvent()));
+
+  // Données connectées au cloud Firestore (soit organisateur authentifié, soit invité via lien secret)
   readonly isCloudConnected = computed(() => {
-    const user = this.currentUser();
-    return Boolean(user);
+    return Boolean(this.currentUser()) || Boolean(this.guestEvent());
   });
 
   readonly events = computed<SecretSantaEvent[]>(() => {
-    if (this.isCloudConnected()) {
+    if (this.currentUser()) {
       return this.cloudEvents();
+    }
+    if (this.guestEvent()) {
+      return [this.guestEvent()!];
     }
     return this.localEvents();
   });
@@ -212,9 +218,15 @@ export class SecretSantaStore {
         this.currentUser.set(user);
         this.authReady.set(true);
 
+        const urlEventId = this.getUrlEventId();
+
         if (user) {
+          this.guestEvent.set(null);
           this.subscribeToUserEvents(user.uid);
+        } else if (urlEventId) {
+          void this.loadGuestEvent(urlEventId);
         } else {
+          this.guestEvent.set(null);
           this.clearSubscriptions();
           this.cloudEvents.set([]);
           this.cloudParticipants.set([]);
@@ -226,6 +238,26 @@ export class SecretSantaStore {
     } catch (err) {
       console.error('Erreur initialisation Firebase :', err);
       this.authReady.set(true);
+    }
+  }
+
+  getUrlEventId(): string | null {
+    if (!this.isBrowser) return null;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('event');
+    } catch {
+      return null;
+    }
+  }
+
+  getUrlParticipantId(): string | null {
+    if (!this.isBrowser) return null;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('participant');
+    } catch {
+      return null;
     }
   }
 
@@ -315,8 +347,12 @@ export class SecretSantaStore {
         this.cloudEvents.set(loaded);
 
         const currentActive = this.activeEventId();
+        const urlId = this.getUrlEventId();
         const nextActive =
-          loaded.find((e) => e.id === currentActive)?.id ?? loaded[0]?.id ?? '';
+          (urlId && loaded.some((e) => e.id === urlId) ? urlId : null) ??
+          loaded.find((e) => e.id === currentActive)?.id ??
+          loaded[0]?.id ??
+          '';
         this.activeEventId.set(nextActive);
 
         if (nextActive) {
@@ -431,11 +467,168 @@ export class SecretSantaStore {
     );
   }
 
+  /**
+   * Charge un événement spécifique en mode invité (via lien secret direct).
+   * Aucun compte organisateur n'est requis.
+   */
+  async loadGuestEvent(eventId: string): Promise<boolean> {
+    if (!this.db || !eventId) return false;
+    this.clearSubscriptions();
+
+    const eventPath = `events/${eventId}`;
+    try {
+      const eventDocRef = doc(this.db, 'events', eventId);
+      this.eventsUnsub = onSnapshot(
+        eventDocRef,
+        (snap) => {
+          if (!snap.exists()) {
+            console.warn(`Atelier introuvable pour l'identifiant : ${eventId}`);
+            this.guestEvent.set(null);
+            this.clearSubcollectionSubscriptions();
+            this.cloudParticipants.set([]);
+            this.cloudWishes.set([]);
+            this.cloudMessages.set([]);
+            this.activeEventId.set(this.localEvents()[0]?.id ?? '');
+            this.errorBanner.set(
+              "L'atelier demandé avec ce lien direct n'existe pas ou a été supprimé. Affichage de l'atelier de démonstration."
+            );
+            return;
+          }
+          const d = snap.data();
+          const evt: SecretSantaEvent = {
+            id: snap.id,
+            title: String(d['title'] ?? ''),
+            subtitle: String(d['subtitle'] ?? ''),
+            eventDate: String(d['eventDate'] ?? ''),
+            location: String(d['location'] ?? ''),
+            budget: Number(d['budget'] ?? 25),
+            inviteCode: String(d['inviteCode'] ?? ''),
+            status: (d['status'] as EventStatus) ?? 'draft',
+            ownerId: String(d['ownerId'] ?? 'organizer'),
+            createdAt: d['createdAt'],
+            updatedAt: d['updatedAt'],
+          };
+          this.guestEvent.set(evt);
+          this.activeEventId.set(evt.id);
+          this.errorBanner.set(null);
+          this.subscribeToGuestEventDetails(evt.id);
+        },
+        (error) => {
+          console.error('Erreur lecture événement invité :', error);
+          this.handleFirestoreError(error, OperationType.GET, eventPath);
+        }
+      );
+      return true;
+    } catch (error) {
+      this.handleFirestoreError(error, OperationType.GET, eventPath);
+    }
+  }
+
+  private subscribeToGuestEventDetails(eventId: string): void {
+    if (!this.db || !eventId) return;
+    this.clearSubcollectionSubscriptions();
+
+    const participantsPath = `events/${eventId}/participants`;
+    const wishesPath = `events/${eventId}/wishes`;
+    const messagesPath = `events/${eventId}/messages`;
+
+    // Mode invité : lecture autorisée par firestore.rules pour les sous-collections de l'événement
+    this.participantsUnsub = onSnapshot(
+      collection(this.db, participantsPath),
+      (snapshot) => {
+        const list: Participant[] = snapshot.docs.map((docSnap) => {
+          const d = docSnap.data();
+          return {
+            id: docSnap.id,
+            eventId: String(d['eventId'] ?? eventId),
+            ownerId: String(d['ownerId'] ?? ''),
+            name: String(d['name'] ?? ''),
+            roleNote: String(d['roleNote'] ?? ''),
+            avatarColor: String(d['avatarColor'] ?? '#C81E32'),
+            pinCode: String(d['pinCode'] ?? '1234'),
+            giftStatus: (d['giftStatus'] as GiftStatus) ?? 'idea',
+            hasRevealed: Boolean(d['hasRevealed']),
+            assignedToId: String(d['assignedToId'] ?? ''),
+            excludedIds: Array.isArray(d['excludedIds'])
+              ? d['excludedIds'].map((x: unknown) => String(x))
+              : [],
+            forcedReceiverId: String(d['forcedReceiverId'] ?? ''),
+            createdAt: d['createdAt'],
+            updatedAt: d['updatedAt'],
+          };
+        });
+        this.cloudParticipants.set(list);
+      },
+      (error) => {
+        this.handleFirestoreError(error, OperationType.LIST, participantsPath);
+      }
+    );
+
+    this.wishesUnsub = onSnapshot(
+      collection(this.db, wishesPath),
+      (snapshot) => {
+        const list: WishItem[] = snapshot.docs.map((docSnap) => {
+          const d = docSnap.data();
+          return {
+            id: docSnap.id,
+            eventId: String(d['eventId'] ?? eventId),
+            participantId: String(d['participantId'] ?? ''),
+            ownerId: String(d['ownerId'] ?? ''),
+            title: String(d['title'] ?? ''),
+            details: String(d['details'] ?? ''),
+            linkUrl: String(d['linkUrl'] ?? ''),
+            estimatedPrice: Number(d['estimatedPrice'] ?? 0),
+            priority: (d['priority'] as WishPriority) ?? 'normal',
+            createdAt: d['createdAt'],
+            updatedAt: d['updatedAt'],
+          };
+        });
+        this.cloudWishes.set(list);
+      },
+      (error) => {
+        this.handleFirestoreError(error, OperationType.LIST, wishesPath);
+      }
+    );
+
+    this.messagesUnsub = onSnapshot(
+      collection(this.db, messagesPath),
+      (snapshot) => {
+        const list: AnonymousMessage[] = snapshot.docs.map((docSnap) => {
+          const d = docSnap.data();
+          let iso = new Date().toISOString();
+          const rawCreated = d['createdAt'] as { toDate?: () => Date } | undefined;
+          if (rawCreated && typeof rawCreated.toDate === 'function') {
+            iso = rawCreated.toDate().toISOString();
+          }
+          return {
+            id: docSnap.id,
+            eventId: String(d['eventId'] ?? eventId),
+            targetParticipantId: String(d['targetParticipantId'] ?? ''),
+            senderRole: (d['senderRole'] as AnonymousSenderRole) ?? 'santa',
+            ownerId: String(d['ownerId'] ?? ''),
+            content: String(d['content'] ?? ''),
+            createdAtIso: iso,
+            createdAt: d['createdAt'],
+            updatedAt: d['updatedAt'],
+          };
+        });
+        this.cloudMessages.set(
+          list.sort((a, b) => (a.createdAtIso ?? '').localeCompare(b.createdAtIso ?? ''))
+        );
+      },
+      (error) => {
+        this.handleFirestoreError(error, OperationType.LIST, messagesPath);
+      }
+    );
+  }
+
   selectEvent(eventId: string): void {
     this.activeEventId.set(eventId);
     const user = this.currentUser();
     if (user) {
       this.subscribeToEventDetails(user.uid, eventId);
+    } else if (this.guestEvent()?.id === eventId) {
+      this.subscribeToGuestEventDetails(eventId);
     }
   }
 
@@ -549,7 +742,13 @@ export class SecretSantaStore {
   async logout(): Promise<void> {
     if (!this.auth) return;
     await signOut(this.auth);
-    this.showToast('Déconnecté. Retour au mode Atelier de démonstration.');
+    const urlEventId = this.getUrlEventId();
+    if (urlEventId) {
+      void this.loadGuestEvent(urlEventId);
+      this.showToast('Déconnecté. Vous êtes en mode invité sur cet atelier.');
+    } else {
+      this.showToast('Déconnecté. Retour au mode Atelier de démonstration.');
+    }
   }
 
   showToast(msg: string): void {
@@ -1308,14 +1507,14 @@ export class SecretSantaStore {
     const cleanPrice = Math.max(0, Math.min(10000, Math.round(Number(payload.estimatedPrice) || 0)));
     const wishId = this.sanitizeId('wish');
 
-    if (this.isCloudConnected() && this.db && this.currentUser()) {
-      const uid = this.currentUser()!.uid;
+    if (this.isCloudConnected() && this.db) {
+      const ownerId = this.currentUser()?.uid ?? evt.ownerId;
       const path = `events/${evt.id}/wishes/${wishId}`;
       try {
         await setDoc(doc(this.db, `events/${evt.id}/wishes`, wishId), {
           eventId: evt.id,
           participantId: payload.participantId,
-          ownerId: uid,
+          ownerId,
           title: cleanTitle,
           details: cleanDetails,
           linkUrl: cleanLink,
@@ -1386,15 +1585,15 @@ export class SecretSantaStore {
 
     const messageId = this.sanitizeId('msg');
 
-    if (this.isCloudConnected() && this.db && this.currentUser()) {
-      const uid = this.currentUser()!.uid;
+    if (this.isCloudConnected() && this.db) {
+      const ownerId = this.currentUser()?.uid ?? evt.ownerId;
       const path = `events/${evt.id}/messages/${messageId}`;
       try {
         await setDoc(doc(this.db, `events/${evt.id}/messages`, messageId), {
           eventId: evt.id,
           targetParticipantId: payload.targetParticipantId,
           senderRole: payload.senderRole,
-          ownerId: uid,
+          ownerId,
           content: cleanContent,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
