@@ -1627,7 +1627,7 @@ export class SecretSantaStore {
     return [
       {
         id: 'evt_famille_moreau_2026',
-        title: 'Réveillon de la Famille Moreau & Amis',
+        title: 'Famille Moreau & Amis',
         subtitle:
           'Un cadeau fait avec le cœur ou déniché avec malice sous le grand sapin du salon !',
         eventDate: '2026-12-24',
