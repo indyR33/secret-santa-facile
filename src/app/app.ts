@@ -589,6 +589,33 @@ export class App implements OnInit {
     this.store.showToast(`Lien individuel de ${participant.name} copié dans le presse-papiers !`);
   }
 
+  copyAllSecretParticipantLinks(): void {
+    if (!this.isBrowser) return;
+    const evt = this.store.activeEvent();
+    const participants = this.store.participants();
+    if (!evt || participants.length === 0) return;
+
+    const baseUrl = window.location.origin + window.location.pathname;
+    const evtId = evt.id;
+
+    const lines = [
+      `🎅 Secret Santa : ${evt.title}`,
+      `Voici les liens secrets d'accès individuels pour chaque participant (munissez-vous de votre code PIN à 4 chiffres à l'ouverture) :\n`,
+      ...participants.map((p) => {
+        const link = `${baseUrl}?event=${encodeURIComponent(evtId)}&participant=${encodeURIComponent(p.id)}`;
+        return `• ${p.name} : ${link}`;
+      }),
+    ];
+
+    const fullText = lines.join('\n');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      void navigator.clipboard.writeText(fullText);
+    }
+    this.store.showToast(
+      `Tous les liens secrets (${participants.length}) ont été copiés dans le presse-papiers !`
+    );
+  }
+
   copyEventLink(): void {
     if (!this.isBrowser) return;
     const baseUrl = window.location.origin + window.location.pathname;

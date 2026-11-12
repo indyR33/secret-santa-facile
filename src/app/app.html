@@ -452,6 +452,17 @@
                     Le statut affiché correspond à l'avancement du cadeau préparé <em>pour</em> chaque participant, sans révéler qui est son Père Noël.
                   </p>
                 </div>
+                @if (!store.isGuestMode() && store.participants().length > 0) {
+                  <button
+                    type="button"
+                    (click)="copyAllSecretParticipantLinks()"
+                    class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#0F766E] bg-[#F0FDFA] hover:bg-[#CCFBF1] border border-[#99F6E4] rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                    title="Copier tous les liens secrets de l'atelier dans le presse-papiers (sans codes PIN)"
+                  >
+                    <mat-icon class="!text-sm !w-4 !h-4">content_copy</mat-icon>
+                    <span>Copier tous les liens secrets</span>
+                  </button>
+                }
               </div>
 
               <!-- Formulaire d'ajout de participant (organisateur uniquement) -->

@@ -134,8 +134,9 @@ Dans la sous-section dédiée bordée de rouge : **« 🔒 Règle Secrète : Tir
 
 ### Étape 6 : Transmettre les accès aux participants (Accès Invité sans inscription)
 Les participants n'ont **aucune obligation de se connecter ou de créer un compte**. L'accès est instantané et direct :
-- **Méthode 1 (Lien individuel secret recommandé)** : Sur la ligne de chaque participant, cliquez sur **« Lien secret »** pour copier son URL d'accès direct (`?event=...&participant=...`). Lorsqu'il ouvre ce lien sur son smartphone ou son ordinateur, l'application charge directement l'atelier réel depuis Firestore, se positionne sur ses cartes et ouvre la boîte de saisie de son code PIN.
-- **Méthode 2 (Lien général de l'atelier)** : Cliquez sur le bouton vert **« Partager l'atelier »** dans la barre supérieure pour copier l'URL globale de l'événement (`?event=...`). Chaque invité n'a plus qu'à cliquer sur son enveloppe et saisir son code PIN.
+- **Méthode 1 (Copie groupée de tous les liens secrets - RECOMMANDÉ)** : Dans le panneau *01. Lutins Participants*, cliquez sur le bouton **« Copier tous les liens secrets »**. L'application copie automatiquement dans votre presse-papiers un message structuré contenant le nom de votre fête et le lien secret individuel de chaque participant (`?event=...&participant=...`), **sans jamais inclure de codes PIN**. Vous n'avez plus qu'à coller ce message dans votre groupe WhatsApp, e-mail ou SMS !
+- **Méthode 2 (Lien individuel par participant)** : Sur la ligne de chaque participant, cliquez sur **« Lien secret »** pour copier uniquement son URL d'accès direct. Lorsqu'il ouvre ce lien sur son smartphone ou son ordinateur, l'application charge directement l'atelier réel depuis Firestore, se positionne sur ses cartes et ouvre la boîte de saisie de son code PIN.
+- **Méthode 3 (Lien général de l'atelier)** : Cliquez sur le bouton vert **« Partager l'atelier »** dans la barre supérieure pour copier l'URL globale de l'événement (`?event=...`). Chaque invité n'a plus qu'à cliquer sur son enveloppe et saisir son code PIN.
 
 ### Étape 7 : Suivre l'avancement global sans divulgation
 Sur le tableau de bord :
