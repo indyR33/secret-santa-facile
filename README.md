@@ -1,4 +1,4 @@
-# 🎅 L'Atelier du Père Noël Secret — Mode d'emploi détaillé
+# 🎅 Secret Santa Facile — Mode d'emploi détaillé
 
 Bienvenue dans **L'Atelier du Père Noël Secret**, l'application conçue pour organiser, animer et suivre vos échanges de cadeaux de fin d'année (famille, amis, collègues) en toute sérénité, tout en préservant le mystère le plus absolu !
 
