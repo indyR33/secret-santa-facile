@@ -60,6 +60,17 @@ export class App implements OnInit {
   readonly unlockedParticipantId = signal<string | null>(null);
   readonly pinError = signal<string | null>(null);
   readonly showDemoPinHint = signal<boolean>(true);
+  readonly showAllPinCodes = signal<boolean>(false);
+  readonly transmittedPinMap = signal<Record<string, boolean>>({});
+
+  // Métadonnées auteur, RGPD & consentement cookies / stockage local
+  readonly appAuthor = 'Richard Digonal';
+  readonly appRepoUrl = 'https://github.com/indyR33/secret-santa-facile';
+  readonly rgpdEmail = 'richard.digonal+santa@gmail.com';
+  readonly showRgpdModal = signal<boolean>(false);
+  readonly showCookieBanner = signal<boolean>(false);
+  readonly cookieConsentChoice = signal<'accepted' | 'essential' | null>(null);
+  private readonly cookieConsentStorageKey = 'ssf_cookie_consent_v1';
 
   // Filtres pour la vue Listes de souhaits
   readonly selectedWishParticipantId = signal<string>('ALL');
@@ -98,7 +109,6 @@ export class App implements OnInit {
   readonly participantForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(60)]],
     roleNote: ['', [Validators.maxLength(100)]],
-    pinCode: ['1234', [Validators.required, Validators.pattern(/^[0-9]{4}$/)]],
   });
 
   readonly exclusionForm = this.fb.nonNullable.group({
@@ -323,6 +333,8 @@ export class App implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadCookieConsent();
+
     const firstPart = this.store.participants()[0];
     const secondPart = this.store.participants()[1];
     if (firstPart) {
@@ -335,6 +347,79 @@ export class App implements OnInit {
         giverId: firstPart.id,
         forcedReceiverId: secondPart?.id ?? '',
       });
+    }
+  }
+
+  // --- RGPD & Consentement Cookies / Stockage local ---
+  openRgpdModal(): void {
+    this.showRgpdModal.set(true);
+  }
+
+  closeRgpdModal(): void {
+    this.showRgpdModal.set(false);
+  }
+
+  openCookiePreferences(): void {
+    this.showCookieBanner.set(true);
+  }
+
+  closeCookieBannerIfSaved(): void {
+    if (this.cookieConsentChoice() !== null) {
+      this.showCookieBanner.set(false);
+    }
+  }
+
+  saveCookieConsent(choice: 'accepted' | 'essential'): void {
+    this.cookieConsentChoice.set(choice);
+    this.showCookieBanner.set(false);
+    if (this.isBrowser) {
+      try {
+        const now = new Date();
+        const expiresAt = new Date(now.getTime());
+        expiresAt.setMonth(expiresAt.getMonth() + 3);
+        window.localStorage.setItem(
+          this.cookieConsentStorageKey,
+          JSON.stringify({
+            choice,
+            savedAt: now.toISOString(),
+            expiresAt: expiresAt.toISOString(),
+          })
+        );
+      } catch {
+        // Ignorer si le stockage local est bloqué par le navigateur
+      }
+    }
+    this.store.showToast('Préférences de confidentialité enregistrées (durée 3 mois).');
+  }
+
+  private loadCookieConsent(): void {
+    if (!this.isBrowser) return;
+    try {
+      const raw = window.localStorage.getItem(this.cookieConsentStorageKey);
+      if (!raw) {
+        this.showCookieBanner.set(true);
+        return;
+      }
+      const parsed = JSON.parse(raw) as {
+        choice?: unknown;
+        expiresAt?: unknown;
+      };
+      const expiresMs =
+        typeof parsed.expiresAt === 'string' ? Date.parse(parsed.expiresAt) : Number.NaN;
+      if (
+        (parsed.choice === 'accepted' || parsed.choice === 'essential') &&
+        !Number.isNaN(expiresMs) &&
+        Date.now() < expiresMs
+      ) {
+        this.cookieConsentChoice.set(parsed.choice);
+        this.showCookieBanner.set(false);
+      } else {
+        window.localStorage.removeItem(this.cookieConsentStorageKey);
+        this.cookieConsentChoice.set(null);
+        this.showCookieBanner.set(true);
+      }
+    } catch {
+      this.showCookieBanner.set(true);
     }
   }
 
@@ -497,12 +582,10 @@ export class App implements OnInit {
     await this.store.addParticipant({
       name: val.name,
       roleNote: val.roleNote,
-      pinCode: val.pinCode,
     });
     this.participantForm.reset({
       name: '',
       roleNote: '',
-      pinCode: '1234',
     });
   }
 
@@ -614,6 +697,24 @@ export class App implements OnInit {
     this.store.showToast(
       `Tous les liens secrets (${participants.length}) ont été copiés dans le presse-papiers !`
     );
+  }
+
+  toggleShowAllPinCodes(): void {
+    this.showAllPinCodes.update((v) => !v);
+  }
+
+  copyPinToClipboard(participant: Participant): void {
+    if (!this.isBrowser) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      void navigator.clipboard.writeText(participant.pinCode);
+    }
+    this.transmittedPinMap.update((map) => ({ ...map, [participant.id]: true }));
+    this.store.showToast(`Code PIN de ${participant.name} (${participant.pinCode}) copié et marqué comme transmis !`);
+  }
+
+  resetTransmittedPins(): void {
+    this.transmittedPinMap.set({});
+    this.store.showToast("Statuts de transmission réinitialisés.");
   }
 
   copyEventLink(): void {

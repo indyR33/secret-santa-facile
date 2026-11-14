@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Bonnet de Noël">
+  <!-- Ombre douce sous le bonnet -->
+  <ellipse cx="30" cy="54" rx="22" ry="4" fill="#1E1B18" opacity="0.12" />
+
+  <!-- Pointe recourbée du bonnet -->
+  <path
+    d="M14 40 C16 20, 28 8, 44 12 C52 14, 54 24, 52 33 C47 30, 44 26, 40 24 C41 31, 44 37, 47 40 Z"
+    fill="#C81E32"
+    stroke="#1E1B18"
+    stroke-width="2.5"
+    stroke-linejoin="round"
+  />
+
+  <!-- Pli d'ombre rouge profond -->
+  <path
+    d="M36 14 C44 15, 49 22, 50 31 C46 28, 43 24, 39 22 C39 27, 41 33, 44 38 L37 38 C35 30, 34 21, 36 14 Z"
+    fill="#9E1425"
+  />
+
+  <!-- Reflet subtil sur le bonnet -->
+  <path
+    d="M20 35 C22 23, 28 15, 36 14"
+    fill="none"
+    stroke="#E85A6B"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    opacity="0.7"
+  />
+
+  <!-- Pompon blanc à la pointe -->
+  <circle
+    cx="52"
+    cy="34"
+    r="7.5"
+    fill="#FFFFFF"
+    stroke="#1E1B18"
+    stroke-width="2.5"
+  />
+  <circle cx="50" cy="32" r="2.2" fill="#F7F2E7" />
+
+  <!-- Rebord en fourrure blanche -->
+  <rect
+    x="8"
+    y="38"
+    width="42"
+    height="14"
+    rx="7"
+    fill="#FFFFFF"
+    stroke="#1E1B18"
+    stroke-width="2.5"
+  />
+  <!-- Texture douce du rebord -->
+  <path
+    d="M14 47.5 Q22 49.5 30 47.5 Q37 49.5 44 47.5"
+    fill="none"
+    stroke="#E6DEC8"
+    stroke-width="2"
+    stroke-linecap="round"
+  />
+</svg>

@@ -1,6 +1,6 @@
 {
-  "name": "L'Atelier du Père Noël Secret",
-  "description": "Application collaborative en français pour organiser et suivre vos tirages au sort Secret Santa : règles d'exclusion, codes PIN secrets, listes de souhaits, suivi des cadeaux et messagerie anonyme.",
+  "name": "Secret Santa Facile",
+  "description": "Application en français pour organiser et suivre votre Secret Santa : règles d'exclusion, codes PIN secrets, listes de souhaits, suivi des cadeaux et messagerie anonyme.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

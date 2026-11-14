@@ -150,8 +150,13 @@ service cloud.firestore {
     // 3. COLLECTION : /events/{eventId}
     // =========================================================================
     match /events/{eventId} {
-      // Les participants munis du lien direct de l'événement peuvent le lire
-      allow get: if isValidId(eventId);
+      // Les participants munis du lien direct peuvent lire l'événement pendant sa durée de conservation RGPD (3 mois max) ;
+      // le propriétaire vérifié conserve l'accès afin de pouvoir exécuter la purge automatique.
+      allow get: if isValidId(eventId) && (
+        resource == null ||
+        (isVerified() && existing().ownerId == request.auth.uid) ||
+        request.time <= existing().createdAt + duration.value(93, 'd')
+      );
       // Seul l'organisateur connecté peut lister l'ensemble de ses événements
       allow list: if isVerified() && existing().ownerId == request.auth.uid;
 

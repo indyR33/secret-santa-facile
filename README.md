@@ -1,6 +1,9 @@
 # 🎅 Secret Santa Facile — Mode d'emploi détaillé
 
-Bienvenue dans **L'Atelier du Père Noël Secret**, l'application conçue pour organiser, animer et suivre vos échanges de cadeaux de fin d'année (famille, amis, collègues) en toute sérénité, tout en préservant le mystère le plus absolu !
+Bienvenue dans **Secret Santa Facile**, l'application conçue pour organiser, animer et suivre vos échanges de cadeaux de fin d'année (famille, amis, collègues) en toute sérénité, tout en préservant le mystère le plus absolu !
+
+- **Auteur & Responsable RGPD** : Richard Digonal (`richard.digonal+santa@gmail.com`)
+- **Dépôt GitHub** : [https://github.com/indyR33/secret-santa-facile](https://github.com/indyR33/secret-santa-facile)
 
 ---
 
@@ -94,11 +97,12 @@ Si vous préférez ne pas utiliser de compte Google :
 3. Cliquez sur **« Créer l'Atelier Secret Santa »**. Votre événement devient automatiquement l'événement actif.
 
 ### Étape 2 : Ajouter les participants
-Dans l'onglet **« Atelier & Tirage »** (section *01. Lutins Participants*) :
+Dans l'onglet **« Atelier »** (section *01. Lutins Participants*) :
 1. Renseignez le **Prénom ou surnom** de la personne (ex. *Camille*).
 2. Ajoutez un **Indice ou une note sur ses goûts** (ex. *Amatrice de romans graphiques & thés fumés*).
-3. Indiquez son **Code PIN initial à 4 chiffres** (par défaut `1234`, que le participant pourra modifier lors de sa première visite).
-4. Cliquez sur **« Ajouter »**. Répétez l'opération pour chaque participant (au moins 3 participants requis).
+3. Cliquez sur **« Ajouter »**. Un **code PIN à 4 chiffres sécurisé est généré automatiquement et aléatoirement** pour chaque participant.
+4. Répétez l'opération pour chaque participant (au moins 3 participants requis).
+5. **Gestion et transmission des codes PIN** : Au-dessus de la grille des cartes des participants (vue organisateur), cliquez sur le bouton **« Afficher tous les codes PIN »**. Vous pourrez alors consulter instantanément le code PIN de chaque participant et **cliquer directement sur son code PIN** pour le copier dans votre presse-papiers : le bouton passe alors au **vert** et indique **« Transmis »** pour suivre facilement votre progression. Vous pouvez également cliquer sur **« Réinitialiser les statuts »** à tout moment pour ramener tous les boutons au rouge.
 
 ### Étape 3 : Définir les règles d'exclusion (couples, doublons)
 Dans la colonne de droite *02. Règles d'Exclusion & Tirage* :
@@ -258,6 +262,16 @@ Si vous publiez ce projet sur un dépôt GitHub (public ou partagé) :
 - Tout développeur clonant le projet peut simplement copier ce fichier modèle en `firebase-applet-config.json` et renseigner ses propres identifiants Firebase.
 - Cela protège vos quotas Firestore personnels contre les requêtes non désirées de tiers clonant votre code, et évite les fausses alertes des scanners GitHub (GitGuardian / Secret Scanning).
 
+### 6. Conformité RGPD, Suppression Automatique (3 mois) & Cookies
+- **Responsable du traitement** : Richard Digonal — contact RGPD : `richard.digonal+santa@gmail.com`.
+- **Suppression automatique des données après 3 mois** :
+  - Chaque atelier et toutes ses données associées (participants, codes PIN, listes de souhaits, messages anonymes) ont une durée de conservation maximale de **3 mois à compter de leur création**.
+  - Passé ce délai, l'accès invité est bloqué côté serveur (`firestore.rules`) et côté client, et les ateliers expirés sont **automatiquement supprimés en cascade** dès la connexion de l'organisateur.
+  - L'organisateur peut également exercer son droit à l'effacement à tout moment via le bouton **« Supprimer l'atelier »**.
+- **Cookies & Stockage local** :
+  - Aucun cookie publicitaire, analytique ou de suivi tiers n'est déposé.
+  - Seul le stockage technique strictement nécessaire est utilisé (mémorisation du choix de consentement pendant 3 mois dans `localStorage` et session Firebase Authentication lorsque l'organisateur se connecte), accompagné d'un bandeau de consentement et d'une modale de politique RGPD accessibles à tout moment depuis le pied de page.
+
 ---
 
 ## 💡 Questions Fréquentes & Dépannage
@@ -279,8 +293,8 @@ L'organisateur ne dispose d'aucun tableau global dévoilant toutes les paires al
 Dans l'onglet **« Atelier & Tirage »**, cliquez sur **« Réinitialiser »**. Cela efface les correspondances secrètes et remet l'événement en statut *Brouillon*, vous permettant de retirer ou d'ajouter des participants avant de relancer un tirage tout neuf.
 
 ### Est-il possible de supprimer un atelier ?
-Oui, tout à fait ! L'organisateur peut supprimer n'importe quel atelier (et toutes les données associées : participants, tirage, souhaits, messages) en cliquant sur le bouton **« Supprimer l'atelier »** situé à côté du sélecteur d'événement en haut de page. Une boîte de confirmation sécurisée demande validation avant la suppression définitive.
+Oui, tout à fait ! L'organisateur peut supprimer n'importe quel atelier (et toutes les données associées : participants, tirage, souhaits, messages) en cliquant sur le bouton **« Supprimer l'atelier »** situé à côté du sélecteur d'événement en haut de page. Une boîte de confirmation sécurisée demande validation avant la suppression définitive. Par ailleurs, tous les ateliers sont automatiquement purgés après **3 mois** conformément à notre politique RGPD.
 
 ---
 
-*Joyeuses fêtes et excellents préparatifs dans l'Atelier du Père Noël Secret ! 🎄✨*
+*Joyeuses fêtes et excellents préparatifs avec Secret Santa Facile ! 🎄✨*

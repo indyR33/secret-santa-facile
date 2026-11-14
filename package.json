@@ -1,6 +1,17 @@
 {
-  "name": "ai-studio-angular-app",
-  "version": "0.0.0",
+  "name": "secret-santa-facile",
+  "version": "1.0.0",
+  "description": "Application en français pour organiser et suivre votre Secret Santa : règles d'exclusion, codes PIN secrets, listes de souhaits, suivi des cadeaux et messagerie anonyme.",
+  "author": {
+    "name": "Richard Digonal",
+    "email": "richard.digonal+santa@gmail.com",
+    "url": "https://github.com/indyR33/secret-santa-facile"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/indyR33/secret-santa-facile.git"
+  },
+  "homepage": "https://github.com/indyR33/secret-santa-facile",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

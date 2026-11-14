@@ -84,6 +84,8 @@ const AVATAR_PALETTE = [
   '#9D174D',
 ];
 
+export const DATA_RETENTION_MONTHS = 3;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -100,6 +102,7 @@ export class SecretSantaStore {
   private participantsUnsub: Unsubscribe | null = null;
   private wishesUnsub: Unsubscribe | null = null;
   private messagesUnsub: Unsubscribe | null = null;
+  private readonly purgingEventIds = new Set<string>();
 
   // Signaux d'état d'authentification et de mode
   readonly currentUser = signal<User | null>(null);
@@ -317,6 +320,92 @@ export class SecretSantaStore {
     this.messagesUnsub = null;
   }
 
+  /**
+   * Extrait une instance Date valide depuis un horodatage Firestore, ISO ou numérique.
+   */
+  extractTimestampDate(raw: unknown): Date | null {
+    if (!raw) return null;
+    if (raw instanceof Date) {
+      return Number.isNaN(raw.getTime()) ? null : raw;
+    }
+    if (typeof raw === 'object') {
+      const maybeObj = raw as { toDate?: () => Date; seconds?: unknown };
+      if (typeof maybeObj.toDate === 'function') {
+        const d = maybeObj.toDate();
+        return Number.isNaN(d.getTime()) ? null : d;
+      }
+      if (typeof maybeObj.seconds === 'number') {
+        const d = new Date(maybeObj.seconds * 1000);
+        return Number.isNaN(d.getTime()) ? null : d;
+      }
+    }
+    if (typeof raw === 'string' || typeof raw === 'number') {
+      const d = new Date(raw);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+    return null;
+  }
+
+  /**
+   * Calcule la date d'expiration RGPD (création + 3 mois calendaires).
+   */
+  getEventExpirationDate(evt: SecretSantaEvent | null | undefined): Date | null {
+    const created = this.extractTimestampDate(evt?.createdAt);
+    if (!created) return null;
+    const expiresAt = new Date(created.getTime());
+    expiresAt.setMonth(expiresAt.getMonth() + DATA_RETENTION_MONTHS);
+    return expiresAt;
+  }
+
+  /**
+   * Vérifie si un événement a dépassé la durée maximale de conservation de 3 mois.
+   */
+  isEventExpired(evt: SecretSantaEvent | null | undefined, now: Date = new Date()): boolean {
+    const expiresAt = this.getEventExpirationDate(evt);
+    if (!expiresAt) return false;
+    return now.getTime() >= expiresAt.getTime();
+  }
+
+  /**
+   * Formate la date de suppression automatique RGPD en français.
+   */
+  formatEventExpirationDate(evt: SecretSantaEvent | null | undefined): string {
+    const expiresAt = this.getEventExpirationDate(evt);
+    if (!expiresAt) return '3 mois après la création';
+    return new Intl.DateTimeFormat('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(expiresAt);
+  }
+
+  private async purgeExpiredEvents(expiredEvents: SecretSantaEvent[]): Promise<void> {
+    const toPurge = expiredEvents.filter((evt) => !this.purgingEventIds.has(evt.id));
+    if (toPurge.length === 0) return;
+
+    let deletedCount = 0;
+    for (const evt of toPurge) {
+      this.purgingEventIds.add(evt.id);
+      try {
+        const ok = await this.deleteEvent(evt.id, { silent: true });
+        if (ok) {
+          deletedCount += 1;
+        } else {
+          this.purgingEventIds.delete(evt.id);
+        }
+      } catch {
+        this.purgingEventIds.delete(evt.id);
+      }
+    }
+
+    if (deletedCount > 0) {
+      const plural = deletedCount > 1 ? 's' : '';
+      this.showToast(
+        `RGPD : ${deletedCount} atelier${plural} datant de plus de 3 mois ${deletedCount > 1 ? 'ont été supprimés' : 'a été supprimé'} automatiquement.`
+      );
+    }
+  }
+
   private subscribeToUserEvents(uid: string): void {
     if (!this.db) return;
     this.clearSubscriptions();
@@ -344,14 +433,21 @@ export class SecretSantaStore {
           };
         });
 
-        this.cloudEvents.set(loaded);
+        const expiredEvents = loaded.filter((evt) => this.isEventExpired(evt));
+        const activeEvents = loaded.filter((evt) => !this.isEventExpired(evt));
+
+        if (expiredEvents.length > 0) {
+          void this.purgeExpiredEvents(expiredEvents);
+        }
+
+        this.cloudEvents.set(activeEvents);
 
         const currentActive = this.activeEventId();
         const urlId = this.getUrlEventId();
         const nextActive =
-          (urlId && loaded.some((e) => e.id === urlId) ? urlId : null) ??
-          loaded.find((e) => e.id === currentActive)?.id ??
-          loaded[0]?.id ??
+          (urlId && activeEvents.some((e) => e.id === urlId) ? urlId : null) ??
+          activeEvents.find((e) => e.id === currentActive)?.id ??
+          activeEvents[0]?.id ??
           '';
         this.activeEventId.set(nextActive);
 
@@ -508,6 +604,20 @@ export class SecretSantaStore {
             createdAt: d['createdAt'],
             updatedAt: d['updatedAt'],
           };
+
+          if (this.isEventExpired(evt)) {
+            this.guestEvent.set(null);
+            this.clearSubcollectionSubscriptions();
+            this.cloudParticipants.set([]);
+            this.cloudWishes.set([]);
+            this.cloudMessages.set([]);
+            this.activeEventId.set(this.localEvents()[0]?.id ?? '');
+            this.errorBanner.set(
+              "Conformément à la politique RGPD, cet atelier a dépassé la durée maximale de conservation de 3 mois et n'est plus accessible."
+            );
+            return;
+          }
+
           this.guestEvent.set(evt);
           this.activeEventId.set(evt.id);
           this.errorBanner.set(null);
@@ -972,8 +1082,10 @@ export class SecretSantaStore {
   /**
    * Suppression complète d'un atelier (événement) et de toutes ses données associées.
    */
-  async deleteEvent(eventId: string): Promise<boolean> {
-    const targetEvt = this.events().find((e) => e.id === eventId);
+  async deleteEvent(eventId: string, options?: { silent?: boolean }): Promise<boolean> {
+    const targetEvt =
+      this.events().find((e) => e.id === eventId) ??
+      this.cloudEvents().find((e) => e.id === eventId);
     const title = targetEvt ? targetEvt.title : 'Atelier';
 
     if (this.isCloudConnected() && this.db && this.currentUser()) {
@@ -991,24 +1103,19 @@ export class SecretSantaStore {
           query(collection(this.db, `events/${eventId}/messages`), where('ownerId', '==', uid))
         );
 
-        // 2. Suppression des documents des sous-collections dans un premier temps
-        let hasSubDocs = false;
-        const subBatch = writeBatch(this.db);
-        partsSnap.forEach((d) => {
-          subBatch.delete(d.ref);
-          hasSubDocs = true;
-        });
-        wishesSnap.forEach((d) => {
-          subBatch.delete(d.ref);
-          hasSubDocs = true;
-        });
-        msgsSnap.forEach((d) => {
-          subBatch.delete(d.ref);
-          hasSubDocs = true;
-        });
+        // 2. Suppression des documents des sous-collections par lots (limite 450 opérations/lot)
+        const refsToDelete = [
+          ...partsSnap.docs.map((d) => d.ref),
+          ...wishesSnap.docs.map((d) => d.ref),
+          ...msgsSnap.docs.map((d) => d.ref),
+        ];
 
-        if (hasSubDocs) {
-          await subBatch.commit();
+        for (let i = 0; i < refsToDelete.length; i += 450) {
+          const batch = writeBatch(this.db);
+          for (const ref of refsToDelete.slice(i, i + 450)) {
+            batch.delete(ref);
+          }
+          await batch.commit();
         }
 
         // 3. Suppression du document événement principal
@@ -1022,7 +1129,9 @@ export class SecretSantaStore {
             this.activeEventId.set('');
           }
         }
-        this.showToast(`L'atelier « ${title} » a été supprimé de Firestore.`);
+        if (!options?.silent) {
+          this.showToast(`L'atelier « ${title} » a été supprimé de Firestore.`);
+        }
         return true;
       } catch (error) {
         this.handleFirestoreError(error, OperationType.DELETE, path);
@@ -1057,7 +1166,9 @@ export class SecretSantaStore {
         this.activeEventId.set(fallbackId);
       }
     }
-    this.showToast(`L'atelier « ${title} » a été supprimé.`);
+    if (!options?.silent) {
+      this.showToast(`L'atelier « ${title} » a été supprimé.`);
+    }
     return true;
   }
 
@@ -1067,16 +1178,17 @@ export class SecretSantaStore {
   async addParticipant(payload: {
     name: string;
     roleNote: string;
-    pinCode: string;
+    pinCode?: string;
   }): Promise<void> {
     const evt = this.activeEvent();
     if (!evt) return;
 
     const cleanName = payload.name.trim().slice(0, BLUEPRINT_CONSTRAINTS.PARTICIPANT_NAME_MAX);
     const cleanNote = payload.roleNote.trim().slice(0, BLUEPRINT_CONSTRAINTS.PARTICIPANT_NOTE_MAX);
-    const cleanPin = BLUEPRINT_CONSTRAINTS.PIN_PATTERN.test(payload.pinCode.trim())
+    const generatedPin = Math.floor(1000 + Math.random() * 9000).toString();
+    const cleanPin = payload.pinCode && BLUEPRINT_CONSTRAINTS.PIN_PATTERN.test(payload.pinCode.trim())
       ? payload.pinCode.trim()
-      : '1234';
+      : generatedPin;
     const participantId = this.sanitizeId('part');
     const avatarColor =
       AVATAR_PALETTE[this.participants().length % AVATAR_PALETTE.length] ?? '#C81E32';
