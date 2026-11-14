@@ -1177,11 +1177,11 @@
                             [class.hover:bg-[#FEE2E2]]="!transmittedPinMap()[p.id]"
                             [class.text-[#C81E32]]="!transmittedPinMap()[p.id]"
                             [class.border-[#FECACA]]="!transmittedPinMap()[p.id]"
-                            [title]="transmittedPinMap()[p.id] ? 'Transmis (cliquer pour copier à nouveau)' : 'Cliquer pour copier le code PIN'"
+                            [title]="transmittedPinMap()[p.id] ? 'Copié / Envoyé (cliquer pour copier à nouveau)' : 'Cliquer pour copier le code PIN'"
                           >
                             <span>PIN : {{ p.pinCode }}</span>
                             <span class="inline-flex items-center gap-1 font-sans font-medium text-[11px]" [class.text-[#166534]]="transmittedPinMap()[p.id]" [class.text-[#991B1B]]="!transmittedPinMap()[p.id]">
-                              <span>{{ transmittedPinMap()[p.id] ? 'Transmis' : 'Copier' }}</span>
+                              <span>{{ transmittedPinMap()[p.id] ? 'Copié / Envoyé' : 'Copier' }}</span>
                               <mat-icon class="!text-xs !w-3.5 !h-3.5">{{ transmittedPinMap()[p.id] ? 'check_circle' : 'content_copy' }}</mat-icon>
                             </span>
                           </button>

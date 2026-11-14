@@ -683,7 +683,7 @@ export class App implements OnInit {
 
     const lines = [
       `🎅 Secret Santa : ${evt.title}`,
-      `Voici les liens secrets d'accès individuels pour chaque participant (munissez-vous de votre code PIN à 4 chiffres à l'ouverture) :\n`,
+      `Voici les liens secrets d'accès individuels pour chaque participant (je vous envoie votre code PIN en privé) :\n`,
       ...participants.map((p) => {
         const link = `${baseUrl}?event=${encodeURIComponent(evtId)}&participant=${encodeURIComponent(p.id)}`;
         return `• ${p.name} : ${link}`;
@@ -706,10 +706,10 @@ export class App implements OnInit {
   copyPinToClipboard(participant: Participant): void {
     if (!this.isBrowser) return;
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      void navigator.clipboard.writeText(participant.pinCode);
+      void navigator.clipboard.writeText(`code PIN: ${participant.pinCode}`);
     }
     this.transmittedPinMap.update((map) => ({ ...map, [participant.id]: true }));
-    this.store.showToast(`Code PIN de ${participant.name} (${participant.pinCode}) copié et marqué comme transmis !`);
+    this.store.showToast(`Code PIN de ${participant.name} (${participant.pinCode}) copié / envoyé !`);
   }
 
   resetTransmittedPins(): void {
