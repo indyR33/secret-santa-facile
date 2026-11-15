@@ -68,6 +68,9 @@ export class App implements OnInit {
   readonly appRepoUrl = 'https://github.com/indyR33/secret-santa-facile';
   readonly rgpdEmail = 'richard.digonal+santa@gmail.com';
   readonly showRgpdModal = signal<boolean>(false);
+  readonly showHelpModal = signal<boolean>(false);
+  readonly activeHelpTab = signal<'guide' | 'faq'>('guide');
+  readonly expandedFaqIndex = signal<number | null>(0);
   readonly showCookieBanner = signal<boolean>(false);
   readonly cookieConsentChoice = signal<'accepted' | 'essential' | null>(null);
   private readonly cookieConsentStorageKey = 'ssf_cookie_consent_v1';
@@ -150,6 +153,45 @@ export class App implements OnInit {
     'As-tu des allergies ou des préférences gourmandes particulières ?',
     'Préfères-tu une surprise utile au quotidien ou un objet créatif ?',
     'Parmi ta liste de souhaits, lequel te ferait le plus briller les yeux ?',
+  ];
+
+  // Éléments de la Foire aux Questions (FAQ)
+  readonly faqItems: readonly { question: string; answer: string }[] = [
+    {
+      question: 'Les participants doivent-ils créer un compte pour participer ?',
+      answer:
+        "Non, aucune inscription n'est requise pour les participants. Seul l'organisateur se connecte (Google SSO ou e-mail/mot de passe) pour créer et administrer l'atelier. Chaque participant ouvre simplement son lien secret avec son code PIN à 4 chiffres.",
+    },
+    {
+      question: 'Comment transmettre les liens secrets et les codes PIN facilement ?',
+      answer:
+        "Dans l'onglet Atelier, utilisez « Copier tous les liens secrets » pour partager les accès individuels en un seul message dans votre groupe (les codes PIN n'y figurent pas). Ensuite, dans « Mission et PIN », cliquez sur « Afficher tous les codes PIN », puis sur le code PIN de chaque personne : « code PIN: XXXX » est copié dans le presse-papiers et le bouton passe au vert (« Copié / Envoyé ») pour suivre vos envois en privé.",
+    },
+    {
+      question: "L'organisateur peut-il savoir qui offre un cadeau à qui ?",
+      answer:
+        "Non. Le tirage aléatoire reste strictement protégé derrière le code PIN personnel de chaque participant. L'organisateur n'a accès qu'aux éventuelles règles de tirage forcé qu'il a lui-même définies et au suivi global d'avancement des cadeaux.",
+    },
+    {
+      question: 'Un participant peut-il modifier son code PIN après ouverture ?',
+      answer:
+        "Oui. Une fois son enveloppe déverrouillée avec le code PIN reçu en privé, un formulaire dans son espace mission lui permet d'enregistrer un nouveau code PIN personnel à 4 chiffres.",
+    },
+    {
+      question: 'Que faire si le tirage au sort indique qu’aucune combinaison n’est possible ?',
+      answer:
+        "Cela signifie que les exclusions (ou règles forcées) cumulées empêchent de former une boucle complète valide. Retirez une ou deux règles d'exclusion dans le panneau de droite jusqu'à ce que l'indicateur repasse au vert.",
+    },
+    {
+      question: 'Un participant peut-il détecter une règle de tirage forcé ?',
+      answer:
+        'Non. L’affichage de la mission et des enveloppes est strictement identique à un tirage au sort aléatoire classique, et les règles forcées ne sont visibles que par l’organisateur connecté.',
+    },
+    {
+      question: 'Combien de temps les données de mon atelier sont-elles conservées ?',
+      answer:
+        'Conformément à notre politique RGPD, toutes les données d’un atelier (participants, codes PIN, listes de souhaits et messages anonymes) sont automatiquement et définitivement supprimées 3 mois après sa création. L’organisateur peut aussi supprimer un atelier à tout moment via « Supprimer l’atelier ».',
+    },
   ];
 
   // Signaux calculés pour l'interface
@@ -350,7 +392,24 @@ export class App implements OnInit {
     }
   }
 
-  // --- RGPD & Consentement Cookies / Stockage local ---
+  // --- RGPD, Aide (Mode d'emploi / FAQ) & Consentement Cookies / Stockage local ---
+  openHelpModal(tab: 'guide' | 'faq' = 'guide'): void {
+    this.activeHelpTab.set(tab);
+    this.showHelpModal.set(true);
+  }
+
+  closeHelpModal(): void {
+    this.showHelpModal.set(false);
+  }
+
+  setHelpTab(tab: 'guide' | 'faq'): void {
+    this.activeHelpTab.set(tab);
+  }
+
+  toggleFaqItem(index: number): void {
+    this.expandedFaqIndex.update((current) => (current === index ? null : index));
+  }
+
   openRgpdModal(): void {
     this.showRgpdModal.set(true);
   }

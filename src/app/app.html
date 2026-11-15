@@ -2479,6 +2479,168 @@
     </aside>
   }
 
+  <!-- ===================================================================== -->
+  <!-- MODALE MODE D'EMPLOI & FAQ                                            -->
+  <!-- ===================================================================== -->
+  @if (showHelpModal()) {
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="helpModalTitle"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4"
+    >
+      <div class="bg-white border border-[#E6DEC8] rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-xl overflow-hidden">
+        <div class="flex items-start justify-between gap-4 px-6 py-5 border-b border-[#E6DEC8] bg-[#F7F2E7]/60">
+          <div class="flex items-start gap-3">
+            <div class="p-2 rounded-xl bg-[#FEF2F2] text-[#C81E32] shrink-0">
+              <mat-icon class="!text-xl !w-6 !h-6">
+                {{ activeHelpTab() === 'guide' ? 'menu_book' : 'help_outline' }}
+              </mat-icon>
+            </div>
+            <div>
+              <h3 id="helpModalTitle" class="font-display text-xl font-bold text-[#1E1B18]">
+                {{ activeHelpTab() === 'guide' ? "Mode d'emploi" : 'Foire aux questions (FAQ)' }}
+              </h3>
+              <p class="text-xs text-[#5C5346] mt-0.5">
+                Secret Santa Facile · Guide pratique organisateur, participants &amp; questions fréquentes
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="closeHelpModal()"
+            class="p-1.5 text-[#5C5346] hover:text-[#1E1B18] rounded-lg hover:bg-[#EDE4D1]/60 transition-colors cursor-pointer"
+            aria-label="Fermer l'aide"
+          >
+            <mat-icon class="!text-lg !w-5 !h-5">close</mat-icon>
+          </button>
+        </div>
+
+        <!-- Onglets Mode d'emploi / FAQ -->
+        <div class="px-6 pt-3 border-b border-[#E6DEC8] bg-[#FFFDF9] flex items-center gap-2">
+          <button
+            type="button"
+            (click)="setHelpTab('guide')"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer"
+            [class.border-[#C81E32]]="activeHelpTab() === 'guide'"
+            [class.text-[#C81E32]]="activeHelpTab() === 'guide'"
+            [class.border-transparent]="activeHelpTab() !== 'guide'"
+            [class.text-[#5C5346]]="activeHelpTab() !== 'guide'"
+          >
+            <mat-icon class="!text-sm !w-4 !h-4">menu_book</mat-icon>
+            <span>Mode d'emploi</span>
+          </button>
+          <button
+            type="button"
+            (click)="setHelpTab('faq')"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer"
+            [class.border-[#C81E32]]="activeHelpTab() === 'faq'"
+            [class.text-[#C81E32]]="activeHelpTab() === 'faq'"
+            [class.border-transparent]="activeHelpTab() !== 'faq'"
+            [class.text-[#5C5346]]="activeHelpTab() !== 'faq'"
+          >
+            <mat-icon class="!text-sm !w-4 !h-4">help_outline</mat-icon>
+            <span>FAQ</span>
+          </button>
+        </div>
+
+        <div class="px-6 py-5 overflow-y-auto space-y-5 text-xs text-[#5C5346] leading-relaxed">
+          @if (activeHelpTab() === 'guide') {
+            <section class="p-4 rounded-xl bg-[#F7F2E7]/70 border border-[#E6DEC8] space-y-2.5">
+              <div class="flex items-center gap-2 text-[#1E1B18]">
+                <mat-icon class="!text-base !w-4 !h-4 text-[#C81E32]">manage_accounts</mat-icon>
+                <h4 class="text-xs font-bold uppercase tracking-wide">
+                  1. Guide de l'Organisateur
+                </h4>
+              </div>
+              <ol class="list-decimal pl-5 space-y-1.5">
+                <li>
+                  <strong class="text-[#1E1B18]">Se connecter et créer un événement :</strong> connectez-vous via Google SSO ou e-mail/mot de passe, puis cliquez sur <em>« Nouvel Événement »</em> (titre, date, lieu et budget conseillé).
+                </li>
+                <li>
+                  <strong class="text-[#1E1B18]">Ajouter les participants :</strong> saisissez chaque prénom et un indice facultatif sur ses goûts. Un <strong>code PIN aléatoire à 4 chiffres</strong> est généré automatiquement pour chacun.
+                </li>
+                <li>
+                  <strong class="text-[#1E1B18]">Exclusions &amp; tirage forcé (optionnel) :</strong> empêchez certains tirages (ex. couples) ou définissez discrètement une attribution forcée dans le panneau réservé à l'organisateur.
+                </li>
+                <li>
+                  <strong class="text-[#1E1B18]">Lancer le tirage au sort :</strong> dès 3 participants minimum, cliquez sur <em>« Lancer le Tirage au Sort Secret »</em> pour sceller un cycle parfait sans doublon ni impasse.
+                </li>
+                <li>
+                  <strong class="text-[#1E1B18]">Envoyer les liens et codes PIN :</strong> utilisez <em>« Copier tous les liens secrets »</em> pour partager tous les liens individuels dans votre groupe (sans les PIN). Dans <em>Mission et PIN</em>, cliquez sur <em>« Afficher tous les codes PIN »</em>, puis cliquez sur chaque PIN pour copier <code class="font-mono-tabular text-[#1E1B18]">code PIN: XXXX</code> : le bouton passe au vert (<em>« Copié / Envoyé »</em>).
+                </li>
+              </ol>
+            </section>
+
+            <section class="p-4 rounded-xl bg-[#F0FDF4]/70 border border-[#BBF7D0] space-y-2.5">
+              <div class="flex items-center gap-2 text-[#166534]">
+                <mat-icon class="!text-base !w-4 !h-4">redeem</mat-icon>
+                <h4 class="text-xs font-bold uppercase tracking-wide">
+                  2. Guide du Participant (sans compte)
+                </h4>
+              </div>
+              <ol class="list-decimal pl-5 space-y-1.5">
+                <li>
+                  <strong class="text-[#1E1B18]">Ouvrir son lien secret :</strong> cliquez simplement sur le lien envoyé par l'organisateur (aucune inscription demandée).
+                </li>
+                <li>
+                  <strong class="text-[#1E1B18]">Déverrouiller sa mission :</strong> saisissez le code PIN à 4 chiffres reçu en privé pour découvrir votre destinataire, le budget et ses envies. Vous pouvez ensuite personnaliser votre PIN et reverrouiller votre enveloppe.
+                </li>
+                <li>
+                  <strong class="text-[#1E1B18]">Mettre à jour son cadeau :</strong> indiquez votre progression (<em>En réflexion</em>, <em>Acheté</em>, <em>Emballé</em>, <em>Prêt !</em>) pour informer le groupe sans dévoiler votre identité.
+                </li>
+                <li>
+                  <strong class="text-[#1E1B18]">Compléter sa liste &amp; discuter :</strong> ajoutez vos souhaits dans <em>Listes de Souhaits / Idées</em> et posez des questions anonymes à votre cible ou répondez à votre Père Noël dans <em>Poste Anonyme</em>.
+                </li>
+              </ol>
+            </section>
+          } @else {
+            <div class="space-y-2.5">
+              @for (item of faqItems; track item.question; let i = $index) {
+                <div class="border border-[#E6DEC8] rounded-xl bg-[#FFFDF9] overflow-hidden">
+                  <button
+                    type="button"
+                    (click)="toggleFaqItem(i)"
+                    class="w-full flex items-center justify-between gap-3 px-4 py-3 text-left text-xs font-semibold text-[#1E1B18] hover:bg-[#F7F2E7]/60 transition-colors cursor-pointer"
+                    [attr.aria-expanded]="expandedFaqIndex() === i"
+                  >
+                    <span>{{ item.question }}</span>
+                    <mat-icon class="!text-base !w-4 !h-4 text-[#5C5346] shrink-0">
+                      {{ expandedFaqIndex() === i ? 'expand_less' : 'expand_more' }}
+                    </mat-icon>
+                  </button>
+                  @if (expandedFaqIndex() === i) {
+                    <div class="px-4 pb-3.5 pt-1 text-xs text-[#5C5346] border-t border-[#E6DEC8]/60 bg-white">
+                      {{ item.answer }}
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3 px-6 py-4 border-t border-[#E6DEC8] bg-[#FFFDF9]">
+          <a
+            [href]="'mailto:' + rgpdEmail"
+            class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#5C5346] hover:text-[#C81E32] underline underline-offset-4"
+          >
+            <mat-icon class="!text-sm !w-4 !h-4">mail_outline</mat-icon>
+            <span>Une autre question ? Contacter l'auteur</span>
+          </a>
+          <button
+            type="button"
+            (click)="closeHelpModal()"
+            class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#1E1B18] hover:bg-[#3A342E] rounded-xl transition-colors cursor-pointer"
+          >
+            <mat-icon class="!text-sm !w-4 !h-4">check</mat-icon>
+            <span>Fermer</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
   <!-- Pied de page sobre avec mentions d'auteur, dépôt GitHub, contact RGPD et gestion des cookies -->
   <footer class="border-t border-[#E6DEC8] bg-[#F7F2E7]/60 mt-12">
     <div class="max-w-[1280px] mx-auto px-6 py-5 flex flex-wrap items-center justify-between gap-4 text-xs text-[#5C5346]">
@@ -2527,6 +2689,22 @@
           class="hover:text-[#1E1B18] underline-offset-4 hover:underline cursor-pointer"
         >
           Listes de souhaits
+        </button>
+        <button
+          type="button"
+          (click)="openHelpModal('guide')"
+          class="inline-flex items-center gap-1 font-semibold text-[#1E1B18] hover:text-[#C81E32] underline-offset-4 hover:underline cursor-pointer"
+        >
+          <mat-icon class="!text-sm !w-4 !h-4">menu_book</mat-icon>
+          <span>Mode d'emploi</span>
+        </button>
+        <button
+          type="button"
+          (click)="openHelpModal('faq')"
+          class="inline-flex items-center gap-1 font-semibold text-[#1E1B18] hover:text-[#C81E32] underline-offset-4 hover:underline cursor-pointer"
+        >
+          <mat-icon class="!text-sm !w-4 !h-4">help_outline</mat-icon>
+          <span>FAQ</span>
         </button>
         <button
           type="button"
