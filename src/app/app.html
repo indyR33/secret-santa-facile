@@ -2502,7 +2502,7 @@
                 {{ activeHelpTab() === 'guide' ? "Mode d'emploi" : 'Foire aux questions (FAQ)' }}
               </h3>
               <p class="text-xs text-[#5C5346] mt-0.5">
-                Secret Santa Facile · Guide pratique organisateur, participants &amp; questions fréquentes
+                {{ store.isGuestMode() ? 'Secret Santa Facile · Guide pratique du participant &amp; questions fréquentes' : 'Secret Santa Facile · Guide pratique organisateur, participants &amp; questions fréquentes' }}
               </p>
             </div>
           </div>
@@ -2546,37 +2546,39 @@
 
         <div class="px-6 py-5 overflow-y-auto space-y-5 text-xs text-[#5C5346] leading-relaxed">
           @if (activeHelpTab() === 'guide') {
-            <section class="p-4 rounded-xl bg-[#F7F2E7]/70 border border-[#E6DEC8] space-y-2.5">
-              <div class="flex items-center gap-2 text-[#1E1B18]">
-                <mat-icon class="!text-base !w-4 !h-4 text-[#C81E32]">manage_accounts</mat-icon>
-                <h4 class="text-xs font-bold uppercase tracking-wide">
-                  1. Guide de l'Organisateur
-                </h4>
-              </div>
-              <ol class="list-decimal pl-5 space-y-1.5">
-                <li>
-                  <strong class="text-[#1E1B18]">Se connecter et créer un événement :</strong> connectez-vous via Google SSO ou e-mail/mot de passe, puis cliquez sur <em>« Nouvel Événement »</em> (titre, date, lieu et budget conseillé).
-                </li>
-                <li>
-                  <strong class="text-[#1E1B18]">Ajouter les participants :</strong> saisissez chaque prénom et un indice facultatif sur ses goûts. Un <strong>code PIN aléatoire à 4 chiffres</strong> est généré automatiquement pour chacun.
-                </li>
-                <li>
-                  <strong class="text-[#1E1B18]">Exclusions &amp; tirage forcé (optionnel) :</strong> empêchez certains tirages (ex. couples) ou définissez discrètement une attribution forcée dans le panneau réservé à l'organisateur.
-                </li>
-                <li>
-                  <strong class="text-[#1E1B18]">Lancer le tirage au sort :</strong> dès 3 participants minimum, cliquez sur <em>« Lancer le Tirage au Sort Secret »</em> pour sceller un cycle parfait sans doublon ni impasse.
-                </li>
-                <li>
-                  <strong class="text-[#1E1B18]">Envoyer les liens et codes PIN :</strong> utilisez <em>« Copier tous les liens secrets »</em> pour partager tous les liens individuels dans votre groupe (sans les PIN). Dans <em>Mission et PIN</em>, cliquez sur <em>« Afficher tous les codes PIN »</em>, puis cliquez sur chaque PIN pour copier <code class="font-mono-tabular text-[#1E1B18]">code PIN: XXXX</code> : le bouton passe au vert (<em>« Copié / Envoyé »</em>).
-                </li>
-              </ol>
-            </section>
+            @if (!store.isGuestMode()) {
+              <section class="p-4 rounded-xl bg-[#F7F2E7]/70 border border-[#E6DEC8] space-y-2.5">
+                <div class="flex items-center gap-2 text-[#1E1B18]">
+                  <mat-icon class="!text-base !w-4 !h-4 text-[#C81E32]">manage_accounts</mat-icon>
+                  <h4 class="text-xs font-bold uppercase tracking-wide">
+                    1. Guide de l'Organisateur
+                  </h4>
+                </div>
+                <ol class="list-decimal pl-5 space-y-1.5">
+                  <li>
+                    <strong class="text-[#1E1B18]">Se connecter et créer un événement :</strong> connectez-vous via Google SSO ou e-mail/mot de passe, puis cliquez sur <em>« Nouvel Événement »</em> (titre, date, lieu et budget conseillé).
+                  </li>
+                  <li>
+                    <strong class="text-[#1E1B18]">Ajouter les participants :</strong> saisissez chaque prénom et un indice facultatif sur ses goûts. Un <strong>code PIN aléatoire à 4 chiffres</strong> est généré automatiquement pour chacun.
+                  </li>
+                  <li>
+                    <strong class="text-[#1E1B18]">Exclusions &amp; tirage forcé (optionnel) :</strong> empêchez certains tirages (ex. couples) ou définissez discrètement une attribution forcée dans le panneau réservé à l'organisateur.
+                  </li>
+                  <li>
+                    <strong class="text-[#1E1B18]">Lancer le tirage au sort :</strong> dès 3 participants minimum, cliquez sur <em>« Lancer le Tirage au Sort Secret »</em> pour sceller un cycle parfait sans doublon ni impasse.
+                  </li>
+                  <li>
+                    <strong class="text-[#1E1B18]">Envoyer les liens et codes PIN :</strong> utilisez <em>« Copier tous les liens secrets »</em> pour partager tous les liens individuels dans votre groupe (sans les PIN). Dans <em>Mission et PIN</em>, cliquez sur <em>« Afficher tous les codes PIN »</em>, puis cliquez sur chaque PIN pour copier <code class="font-mono-tabular text-[#1E1B18]">code PIN: XXXX</code> : le bouton passe au vert (<em>« Copié / Envoyé »</em>).
+                  </li>
+                </ol>
+              </section>
+            }
 
             <section class="p-4 rounded-xl bg-[#F0FDF4]/70 border border-[#BBF7D0] space-y-2.5">
               <div class="flex items-center gap-2 text-[#166534]">
                 <mat-icon class="!text-base !w-4 !h-4">redeem</mat-icon>
                 <h4 class="text-xs font-bold uppercase tracking-wide">
-                  2. Guide du Participant (sans compte)
+                  {{ store.isGuestMode() ? 'Guide du Participant (sans compte)' : '2. Guide du Participant (sans compte)' }}
                 </h4>
               </div>
               <ol class="list-decimal pl-5 space-y-1.5">
